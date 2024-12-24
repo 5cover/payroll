@@ -1,8 +1,10 @@
 # Scratch
 
-## Import XLS with library
+## ~~Import XLS with library~~
 
-## Fix calculation
+SheetJS
+
+## ~~Fix calculation~~
 
 ## ~~Format dates and times~~
 

@@ -1,4 +1,4 @@
-import { requireElementById, insertHeaderCell, formatHms } from './util.mjs';
+import { requireElementById, insertHeaderCell, formatHms, parseExcel, parseCsv } from './util.mjs';
 import { parseWorkerChecks, getWorkingHours, unprimitivize_key } from './domain.mjs';
 
 const inputFile = /** @type { HTMLInputElement } */ (requireElementById('input-file'));
@@ -16,7 +16,10 @@ buttonClear.addEventListener('click', () => {
 inputFile.addEventListener('change', async function () {
     for (const file of this.files || []) {
         try {
-            addResult(parseWorkerChecks(await file.text()));
+            const result = file.type === 'text/csv'
+                ? parseCsv(await file.text())
+                : await parseExcel(file);
+            addResult(parseWorkerChecks(result));
         } catch (e) {
             pInputError.textContent = 'Failed to import the working hours sheet. You can try exporting it to CSV and importing that instead. ' + e;
             return;
@@ -38,13 +41,30 @@ function addResult(workerChecks) {
             addResultRow(whs.size, i++, key, ...wh);
         }
 
-        for (; i < keyHeaders.length; ++i) {
-            const hr = tableResults.insertRow();
-            fillHeaderRow(hr, i, key);
+        if (i < keyHeaders.length) {
+            const hr = addKeyPaddingRow(i, key);
             const padc = hr.insertCell();
-            padc.colSpan = 6 - hr.cells.length;
+            padc.rowSpan = keyHeaders.length - i++;
+            padc.colSpan = 5 - hr.cells.length;
         }
+        while (i < keyHeaders.length) {
+            addKeyPaddingRow(i++, key);
+        }
+
+        // padding row
+        tableResults.insertRow().insertCell().colSpan = 5;
     }
+}
+
+/**
+ * 
+ * @param {number} i 
+ * @param {import('./domain.mjs').Key} key 
+ */
+function addKeyPaddingRow(i, key) {
+    const hr = tableResults.insertRow();
+    fillHeaderRow(hr, i++, key);
+    return hr;
 }
 
 /**

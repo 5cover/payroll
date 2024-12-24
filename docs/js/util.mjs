@@ -1,3 +1,6 @@
+/// <reference types="https://cdn.sheetjs.com/xlsx-0.20.3/package/types/index.d.ts" />
+import * as XSLX from "https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs";
+
 /**
  * @param {string} id
  */
@@ -133,19 +136,41 @@ export function parseCsv(str) {
         if (cc == '"') { quote = !quote; continue; }
 
         // If it's a comma and we're not in a quoted field, move on to the next column
-        if (cc == ',' && !quote) { ++col; continue; }
+        if (!quote && cc == ',') { ++col; continue; }
 
         // If it's a newline (CRLF) and we're not in a quoted field, skip the next character
         // and move on to the next row and move to column 0 of that new row
-        if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; continue; }
+        if (!quote && cc == '\r' && nc == '\n') { ++row; col = 0; ++c; continue; }
 
         // If it's a newline (LF or CR) and we're not in a quoted field,
         // move on to the next row and move to column 0 of that new row
-        if (cc == '\n' && !quote) { ++row; col = 0; continue; }
-        if (cc == '\r' && !quote) { ++row; col = 0; continue; }
+        if (!quote && (cc == '\n' || cc == '\r')) { ++row; col = 0; continue; }
 
         // Otherwise, append the current character to the current column
         arr[row][col] += cc;
     }
     return arr;
+}
+
+/**
+ * @param {Blob} file
+ * @return {Promise<any[]>}
+ */
+export async function parseExcel(file) {
+    const workbook = XSLX.read(await file.arrayBuffer(), { dense: true });
+    /**
+     * @type {any[]}
+     */
+    const data = workbook.Sheets[workbook.SheetNames[0]]['!data'];
+    data.shift(); // skip header
+    // modifying the array in place is probably more efficient than a map
+    for (let i = 0; i < data.length; ++i) {
+        const r = data[i];
+        for (let j = 0; j < r.length; ++j) {
+            if (r[j] !== undefined) {
+                r[j] = r[j]['w'];
+            }
+        }
+    }
+    return data;
 }

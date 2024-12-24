@@ -18,7 +18,6 @@ export function getWorkingHours(key, checks) {
      * @type {DefaultMap<string, number>}
      */
     const workedFor = new DefaultMap(() => 0);
-    debugger;
     for (const d of checks) {
         if (working) {
             if (lastClockIn === null) throw Error('bug');
@@ -51,10 +50,9 @@ export function getWorkingHours(key, checks) {
 }
 
 /**
- * @param {string} str 
+ * @param {any[]} rows
  */
-export function parseWorkerChecks(str) {
-    const rows = parseCsv(str);
+export function parseWorkerChecks(rows) {
     rows.shift(); // Remove header row
     /** @type {DefaultMap<string, Date[]>} */
     const working_hours = new DefaultMap(() => []);
