@@ -12,12 +12,13 @@
 <body>
     <h1>Working hours calculator</h1>
     <h2>1. Upload the working hours sheet</h2>
-    <p><em>All processing is done locally</em></p>
+    <p><em>Multiple files can be imported at once. All processing is done locally.</em></p>
     <p>
-        <input type="file" id="input-file" accept=".xls,.csv,text/csv">
+        <input type="file" id="input-file" accept=".xls,.csv,text/csv" multiple>
     </p>
     <p id="p-input-error" class="error"></p>
     <h2>2. Results</h2>
+    <button type="button" id="button-clear">Clear</button>
     <table id="table-results">
     </table>
 </body>

@@ -69,14 +69,40 @@ export function parseCsv(str) {
 }
 
 /**
+ * @param {Date} date
+ * @param {number} delta
+ */
+export function chday(date, delta) {
+    date.setDate(date.getDate() + delta);
+}
+
+/**
+ * @param {number} time 
+ */
+export function formatHms(time) {
+    const h = time / 3600_000, m = time / 60_000 % 60, s = time % 60_000,
+        f = (/** @type {number} */ n) => Math.trunc(n).toString().padStart(2, '0');
+    return `${f(h)}:${f(m)}:${f(s)}`;
+}
+
+/**
  * @template TKey, TValue
  * @extends {Map<TKey, TValue>}
  */
 export class DefaultMap extends Map {
     #default;
+
+    /**
+     * @param {() => TValue} defaultFactory
+     */
+    constructor(defaultFactory) {
+        super();
+        this.#default = defaultFactory;
+    }
+
     /**
      * @param {TKey} key
-     */
+    */
     get(key) {
         const value = super.get(key);
         if (value !== undefined) {
@@ -88,10 +114,10 @@ export class DefaultMap extends Map {
     }
 
     /**
-     * @param {() => TValue} defaultFactory
+     * @param {TKey} key
+     * @param {(value: TValue) => TValue} f
      */
-    constructor(defaultFactory) {
-        super();
-        this.#default = defaultFactory;
+    map(key, f) {
+        this.set(key, f(this.get(key)));
     }
 }

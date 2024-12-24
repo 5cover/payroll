@@ -1,8 +1,12 @@
 # Scratch
 
-## Format dates and times
+## Import XLS with library
 
-## Calculate working hours
+## Fix calculation
+
+## ~~Format dates and times~~
+
+## ~~Calculate working hours~~
 
 ## ~~Parse CSV~~
 
