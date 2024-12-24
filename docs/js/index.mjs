@@ -4,11 +4,14 @@ import { parseWorkerChecks, getWorkingHours, unprimitivize_key } from './domain.
 const inputFile = /** @type { HTMLInputElement } */ (requireElementById('input-file'));
 const tableResults = /** @type { HTMLTableElement } */ (requireElementById('table-results'));
 const pInputError = requireElementById('p-input-error');
-const buttonClear = requireElementById('button-clear');
+const buttonClear = /** @type { HTMLButtonElement } */ (requireElementById('button-clear'));
 
 const keyHeaders = ['Department', 'Name', 'No.', 'ID Number'];
 
-buttonClear.addEventListener('click', () => tableResults.textContent = '');
+buttonClear.addEventListener('click', () => {
+    tableResults.textContent = '';
+    buttonClear.disabled = true;
+});
 
 inputFile.addEventListener('change', async function () {
     for (const file of this.files || []) {
@@ -25,6 +28,7 @@ inputFile.addEventListener('change', async function () {
  * @param {Map<string, Date[]>} workerChecks
  */
 function addResult(workerChecks) {
+    buttonClear.disabled = false;
     for (const [pkey, checks] of workerChecks.entries()) {
         const key = unprimitivize_key(pkey);
         let i = 0;
