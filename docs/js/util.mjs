@@ -1,6 +1,12 @@
 /**
  * @param {string} id
  */
+
+export const timePerDay = 86400_000;
+export const timePerHour = 3600_000;
+export const timePerMinute = 60_000;
+export const timePerSecond = 1_000;
+
 export function requireElementById(id) {
     const el = document.getElementById(id);
     if (el === null) {
@@ -27,6 +33,82 @@ export function notnull(arg) {
  */
 export function insertHeaderCell(row) {
     return row.appendChild(document.createElement('th'));
+}
+
+/**
+ * @param {Date} date
+ * @param {number} delta
+ */
+export function chday(date, delta) {
+    date.setDate(date.getDate() + delta);
+}
+
+/**
+ * @param {number} time 
+ */
+export function formatHms(time) {
+    const h = time / timePerHour, m = time % timePerHour / timePerMinute, s = time % timePerMinute / timePerSecond,
+        f = (/** @type {number} */ n) => Math.trunc(n).toString().padStart(2, '0');
+    return `${f(h)}:${f(m)}:${f(s)}`;
+}
+
+
+/**
+ * @param {Date} d1
+ * @param {Date} d2
+ */
+export function dateDayDiff(d1, d2) {
+    return (new Date(d1).setHours(0, 0, 0) - new Date(d2).setHours(0, 0, 0)) / timePerDay;
+}
+
+/**
+ * @param {Date} date 
+ * @param {number} h 
+ * @param {number} m 
+ * @param {number} s 
+ */
+export function dateTimeUntil(date, h, m, s) {
+    return timePerHour * (h - date.getHours())
+        + timePerMinute * (m - date.getMinutes())
+        + timePerSecond * (s - date.getSeconds());
+}
+
+
+/**
+ * @template TKey, TValue
+ * @extends {Map<TKey, TValue>}
+ */
+export class DefaultMap extends Map {
+    #default;
+
+    /**
+     * @param {() => TValue} defaultFactory
+     */
+    constructor(defaultFactory) {
+        super();
+        this.#default = defaultFactory;
+    }
+
+    /**
+     * @param {TKey} key
+    */
+    get(key) {
+        const value = super.get(key);
+        if (value !== undefined) {
+            return value;
+        }
+        const def = this.#default();
+        this.set(key, def);
+        return def;
+    }
+
+    /**
+     * @param {TKey} key
+     * @param {(value: TValue) => TValue} f
+     */
+    map(key, f) {
+        this.set(key, f(this.get(key)));
+    }
 }
 
 /**
@@ -66,58 +148,4 @@ export function parseCsv(str) {
         arr[row][col] += cc;
     }
     return arr;
-}
-
-/**
- * @param {Date} date
- * @param {number} delta
- */
-export function chday(date, delta) {
-    date.setDate(date.getDate() + delta);
-}
-
-/**
- * @param {number} time 
- */
-export function formatHms(time) {
-    const h = time / 3600_000, m = time / 60_000 % 60, s = time % 60_000,
-        f = (/** @type {number} */ n) => Math.trunc(n).toString().padStart(2, '0');
-    return `${f(h)}:${f(m)}:${f(s)}`;
-}
-
-/**
- * @template TKey, TValue
- * @extends {Map<TKey, TValue>}
- */
-export class DefaultMap extends Map {
-    #default;
-
-    /**
-     * @param {() => TValue} defaultFactory
-     */
-    constructor(defaultFactory) {
-        super();
-        this.#default = defaultFactory;
-    }
-
-    /**
-     * @param {TKey} key
-    */
-    get(key) {
-        const value = super.get(key);
-        if (value !== undefined) {
-            return value;
-        }
-        const def = this.#default();
-        this.set(key, def);
-        return def;
-    }
-
-    /**
-     * @param {TKey} key
-     * @param {(value: TValue) => TValue} f
-     */
-    map(key, f) {
-        this.set(key, f(this.get(key)));
-    }
 }

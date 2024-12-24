@@ -1,4 +1,5 @@
-import { notnull, parseCsv, chday, DefaultMap } from './util.mjs';
+import { notnull, parseCsv, chday, dateDayDiff, dateTimeUntil, DefaultMap, timePerDay, timePerMinute } from './util.mjs';
+
 
 /**
  * @typedef {[string, string, string, string, string]} Key 
@@ -11,53 +12,43 @@ import { notnull, parseCsv, chday, DefaultMap } from './util.mjs';
  */
 export function getWorkingHours(key, checks) {
     let working = false;
-    let last_clock_in = null;
-    /** @type {DefaultMap<string, number>} */
+    let lastClockIn = null;
+
+    /**
+     * @type {DefaultMap<string, number>}
+     */
     const workedFor = new DefaultMap(() => 0);
+    debugger;
     for (const d of checks) {
-        if (!working) {
-            last_clock_in = d;
+        if (working) {
+            if (lastClockIn === null) throw Error('bug');
+
+            let dayDiff = dateDayDiff(d, lastClockIn);
+            if (dayDiff) {
+                // make previous work until 23:59
+                workedFor.map(lastClockIn.toLocaleDateString(), v => v + dateTimeUntil(lastClockIn, 23, 59, 0));
+
+                // account for full 24hours of work
+                while (dayDiff > 1) {
+                    chday(lastClockIn, 1);
+                    workedFor.map(lastClockIn.toLocaleDateString(), v => v + timePerDay - timePerMinute); // work full days 23:59
+                    dayDiff--;
+                }
+
+                // make next work since midnight
+                lastClockIn = new Date(d);
+                lastClockIn.setHours(0, 0, 0);
+                working = true;
+            }
+            workedFor.map(d.toLocaleDateString(), v => d.getTime() - lastClockIn.getTime() + v);
         } else {
-            binTime(workedFor, notnull(last_clock_in), d);
+            lastClockIn = d;
         }
         working = !working;
     }
 
     return workedFor;
 }
-
-/**
- * 
- * @param {DefaultMap<string, number>} workedFor 
- * @param {Date} min
- * @param {Date} max
- */
-function binTime(workedFor, min, max) {
-    const imin = ceilDate(min);
-    const imax = floorDate(max);
-
-    let diff = imin.getTime() - min.getTime();
-    if (diff) {
-        workedFor.map(min.toLocaleDateString(), v => v + diff - 60_000);
-    }
-    for (const i = new Date(imin); i < imax; chday(i, 1)) {
-        workedFor.map(i.toLocaleDateString(), v => v + 23 * 3600_000 + 59 * 60_000);
-    }
-    diff = max.getTime() - imax.getTime();
-    if (diff) {
-        workedFor.map(imax.toLocaleDateString(), v => v + diff);
-    }
-}
-
-/*
-02/12/2024 21:00:00 -> 04/12/2024 04:00:00
-
-02/12/2024 -> 02:59:00
-03/12/2024 -> 23:59:00
-04/12/2024 -> 04:00:00
-*/
-let d1 = new Date(2024, 12, 2, 21, 0, 0);
-let d2 = new Date(2024, 12, 4, 4, 0, 0);
 
 /**
  * @param {string} str 
