@@ -149,6 +149,7 @@ export function parseCsv(str) {
         // Otherwise, append the current character to the current column
         arr[row][col] += cc;
     }
+    arr.shift(); // Remove header row
     return arr;
 }
 

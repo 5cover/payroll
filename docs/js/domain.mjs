@@ -53,7 +53,6 @@ export function getWorkingHours(key, checks) {
  * @param {any[]} rows
  */
 export function parseWorkerChecks(rows) {
-    rows.shift(); // Remove header row
     /** @type {DefaultMap<string, Date[]>} */
     const working_hours = new DefaultMap(() => []);
     for (const [department, name, no, dateTime, locationId, idNumber, verifyCode, cardNo] of rows) {
