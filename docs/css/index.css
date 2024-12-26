@@ -1,10 +1,9 @@
-:root {
-    font-family: system-ui;
-    font-size: 1.1em;
-}
-
 table {
     border-collapse: collapse;
+}
+
+tr:first-child th {
+    text-align: center;
 }
 
 th,
@@ -12,10 +11,6 @@ td {
     border: 1px solid black;
     padding: 8px;
     text-align: left;
-}
-
-.error {
-    color: red
 }
 
 #p-input-error:empty {

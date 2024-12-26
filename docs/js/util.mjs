@@ -10,6 +10,9 @@ export const timePerHour = 3600_000;
 export const timePerMinute = 60_000;
 export const timePerSecond = 1_000;
 
+/**
+ * @param {string} id
+ */
 export function requireElementById(id) {
     const el = document.getElementById(id);
     if (el === null) {
@@ -21,11 +24,12 @@ export function requireElementById(id) {
 /**
  * @template T
  * @param {T|null} arg
+ * @param {string} msg
  * @return {T}
  */
-export function notnull(arg) {
+export function notnull(arg, msg) {
     if (arg === null) {
-        throw new Error('was null');
+        throw new Error(msg);
     }
     return arg;
 }
@@ -76,6 +80,14 @@ export function dateTimeUntil(date, h, m, s) {
         + timePerSecond * (s - date.getSeconds());
 }
 
+/**
+ * 
+ * @param {Date} date 
+ * @returns 
+ */
+export function dateOnly(date) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
 
 /**
  * @template TKey, TValue

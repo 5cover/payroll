@@ -1,5 +1,8 @@
-import { notnull, chday, dateDayDiff, dateTimeUntil, DefaultMap, timePerDay, timePerMinute } from './util.mjs';
+import { primitivizeDateOnly, primitivizeKey } from './prim.mjs';
+import { notnull, chday, dateDayDiff, dateTimeUntil, DefaultMap, timePerDay, timePerMinute, timePerHour, formatHms } from './util.mjs';
 
+export const minWorkTime = 10 * timePerMinute;
+export const maxWorkTime = 10 * timePerHour;
 
 /**
  * @typedef {[string, string, string, string, string]} Key 
@@ -9,28 +12,35 @@ import { notnull, chday, dateDayDiff, dateTimeUntil, DefaultMap, timePerDay, tim
  * 
  * @param {Key} key 
  * @param {Date[]} checks 
+ * @return {[DefaultMap<string, number>, DefaultMap<string, string[]>]} A 2-uple of the work time per date only, and the warnings per date only.
  */
 export function getWorkingHours(key, checks) {
-    let working = false;
-    let lastClockIn = null;
-
+    /** @type {DefaultMap<string, string[]>} */
+    const warnings = new DefaultMap(() => []);
     /**
      * @type {DefaultMap<string, number>}
      */
-    const workedFor = new DefaultMap(() => 0);
-    for (const d of checks) {
+    const workTimes = new DefaultMap(() => 0);
+
+    const dateKey = primitivizeDateOnly;
+
+    let working = false;
+    let lastClockIn = null;
+    for (let i = 0; i < checks.length; ++i) {
+        const d = checks[i];
+
         if (working) {
             if (lastClockIn === null) throw Error('bug');
 
             let dayDiff = dateDayDiff(d, lastClockIn);
             if (dayDiff) {
                 // make previous work until 23:59
-                workedFor.map(lastClockIn.toLocaleDateString(), v => v + dateTimeUntil(lastClockIn, 23, 59, 0));
+                workTimes.map(dateKey(lastClockIn), v => v + dateTimeUntil(lastClockIn, 23, 59, 0));
 
                 // account for full 24hours of work
                 while (dayDiff > 1) {
                     chday(lastClockIn, 1);
-                    workedFor.map(lastClockIn.toLocaleDateString(), v => v + timePerDay - timePerMinute); // work full days 23:59
+                    workTimes.map(dateKey(lastClockIn), v => v + timePerDay - timePerMinute); // work full days 23:59
                     dayDiff--;
                 }
 
@@ -39,14 +49,36 @@ export function getWorkingHours(key, checks) {
                 lastClockIn.setHours(0, 0, 0);
                 working = true;
             }
-            workedFor.map(d.toLocaleDateString(), v => d.getTime() - lastClockIn.getTime() + v);
+            workTimes.map(dateKey(d), v => d.getTime() - lastClockIn.getTime() + v);
         } else {
+            // Check for inconsistencies
+            if (i + 1 < checks.length) {
+                const dnext = checks[i + 1];
+                const diff = dnext.getTime() - d.getTime();
+
+                if (diff < minWorkTime) {
+                    warn('likely double badged');
+                    continue;
+                }
+                else if (diff > maxWorkTime) {
+                    warn('likely forgot to badge');
+                    continue;
+                }
+
+                /**
+                 * @param {string} msg
+                 */
+                function warn(msg) {
+                    warnings.get(dateKey(dnext)).push(`employee entered at ${d.toLocaleString()}, worked until ${dnext.toLocaleTimeString()} (for ${formatHms(dnext.getTime() - d.getTime())}): ` + msg);
+                }
+            }
+
             lastClockIn = d;
         }
         working = !working;
     }
 
-    return workedFor;
+    return [workTimes, warnings];
 }
 
 /**
@@ -54,29 +86,13 @@ export function getWorkingHours(key, checks) {
  */
 export function parseWorkerChecks(rows) {
     /** @type {DefaultMap<string, Date[]>} */
-    const working_hours = new DefaultMap(() => []);
+    const workingHours = new DefaultMap(() => []);
     for (const [department, name, no, dateTime, locationId, idNumber, verifyCode, cardNo] of rows) {
-        const key = primitivize_key([department, name, no, ...parseIdNumber(idNumber)]);
+        const key = primitivizeKey([department, name, no, ...parseIdNumber(idNumber)]);
         const date = parseDateTime(dateTime);
-        working_hours.get(key).push(date);
+        workingHours.get(key).push(date);
     }
-    return working_hours;
-}
-
-/**
- * composite key hack
- * @param {Key} key
- */
-export function primitivize_key(key) {
-    return JSON.stringify(key);
-}
-
-/**
- * @param {string} key 
- * @returns {Key}
- */
-export function unprimitivize_key(key) {
-    return JSON.parse(key);
+    return workingHours;
 }
 
 /**
@@ -84,7 +100,7 @@ export function unprimitivize_key(key) {
  */
 function parseDateTime(input) {
     const pattern = /^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})$/;
-    const [, D, M, Y, h, m, s] = notnull(pattern.exec(input));
+    const [, D, M, Y, h, m, s] = notnull(pattern.exec(input), 'failed to parse date time');
     return new Date(+Y, +M - 1, +D, +h, +m, +s);
 }
 
@@ -94,29 +110,6 @@ function parseDateTime(input) {
  */
 function parseIdNumber(input) {
     const pattern = /^([A-Z]+)(\d*)$/;
-    const [, c, n] = notnull(pattern.exec(input));
+    const [, c, n] = notnull(pattern.exec(input), 'failed to parse id number');
     return [c, n];
-}
-
-/**
- * @param {Date} date 
- */
-function ceilDate(date) {
-    const d = new Date(date);
-    if (date.getHours() !== 0 || date.getMinutes() !== 0 || date.getSeconds() !== 0) {
-        chday(d, 1);
-        d.setHours(0, 0, 0);
-    }
-    return d;
-}
-
-/**
- * @param {Date} date
- */
-function floorDate(date) {
-    const d = new Date(date);
-    if (date.getHours() != 23 || date.getMinutes() != 59) {
-        d.setHours(0, 0, 0);
-    }
-    return d;
 }

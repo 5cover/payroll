@@ -1,15 +1,15 @@
 # Scratch
 
-## ~~Import XLS with library~~
+## Export XLS
 
-SheetJS
+## Progress status
 
-## ~~Fix calculation~~
+parsing and xls generation
 
-## ~~Format dates and times~~
+## Show max time in red outside
 
-## ~~Calculate working hours~~
+## Show summary with warnings
 
-## ~~Parse CSV~~
+And action buttons : allow and disallow (find better terms)
 
-Aggregate CSV and agrregate into Map(Key, List(DateTime))
+## Use typescript

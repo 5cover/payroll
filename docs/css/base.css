@@ -1,0 +1,13 @@
+:root {
+    font-family: system-ui;
+    font-size: 1.1em;
+}
+
+header ul {
+    list-style: none;
+    padding: 0;
+}
+
+.error {
+    color: red
+}
