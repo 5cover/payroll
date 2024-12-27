@@ -50,7 +50,7 @@ export function getWorkTime(key: Key, checks: Date[]): [DefaultMap<string, numbe
                     continue;
                 }
                 else if (diff > maxWorkTime) {
-                    warn('likely forgot to badge');
+                    //warn('likely forgot to badge'); // disabled as it is insignificant
                     continue;
                 }
 

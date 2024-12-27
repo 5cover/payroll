@@ -1,4 +1,4 @@
-import { Key } from "./domain";
+import { Key } from "./domain.js";
 
 export function primitivizeDateOnly(date: Date) {
     return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;

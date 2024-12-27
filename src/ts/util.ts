@@ -1,4 +1,4 @@
-import { CellObject } from './xlsx';
+import type { CellObject } from './xlsx';
 
 declare const XSLX: typeof import('./xlsx');
 
