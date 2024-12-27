@@ -1,6 +1,7 @@
 :root {
     font-family: system-ui;
     font-size: 1.1em;
+    scroll-behavior: smooth;
 }
 
 header ul {
@@ -9,5 +10,5 @@ header ul {
 }
 
 .error {
-    color: red
+    color: red;
 }

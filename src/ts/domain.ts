@@ -46,11 +46,11 @@ export function getWorkTime(key: Key, checks: Date[]): [DefaultMap<string, numbe
                 const diff = dnext.getTime() - d.getTime();
 
                 if (diff < minWorkTime) {
-                    warn('likely double badged');
+                    //warn('likely double badged'); // disabled as it is insignificant
                     continue;
                 }
                 else if (diff > maxWorkTime) {
-                    //warn('likely forgot to badge'); // disabled as it is insignificant
+                    warn('likely forgot to badge');
                     continue;
                 }
 

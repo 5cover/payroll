@@ -1,11 +1,10 @@
 import { requireElementById, parseExcel, parseCsv } from './util.js';
 import { parseWorkerChecks, } from './domain.js';
-import ResultTable from './component/ResultTable.js';
+import ResultsView from './component/ResultsView.js';
 const inputFile = requireElementById('input-file');
-//const tableWarnings = requireElementById('table-warnings') as HTMLTableElement;
 const pInputError = requireElementById('p-input-error');
 const buttonClear = requireElementById('button-clear');
-const resultTable = new ResultTable(requireElementById('table-results'));
+const resultTable = new ResultsView(requireElementById('table-results'), requireElementById('table-warnings'));
 buttonClear.addEventListener('click', () => {
     buttonClear.disabled = true;
     resultTable.clear();
@@ -21,8 +20,8 @@ inputFile.addEventListener('change', function () {
                 resultTable.addResult(parseWorkerChecks(result));
             }
             catch (e) {
-                pInputError.textContent = 'Failed to import the badges sheet. You can try exporting it to CSV and importing that instead. ' + e;
-                return;
+                pInputError.textContent = 'Failed to import the badges sheet. You can try exporting it to CSV and importing that instead. ' + String(e);
+                throw e;
             }
         }
     })();
