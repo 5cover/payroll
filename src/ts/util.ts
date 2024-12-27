@@ -15,7 +15,7 @@ export function requireElementById(id: string) {
     return el;
 }
 
-export function notnull<T>(arg: T|null, msg: string) {
+export function notnull<T>(arg: T | null, msg: string) {
     if (arg === null) {
         throw new Error(msg);
     }
@@ -80,7 +80,7 @@ export function parseCsv(str: string) {
 
     // Iterate over each character, keep track of current row and column (of the returned array)
     for (let row = 0, col = 0, c = 0; c < str.length; c++) {
-        let cc = str[c], nc = str[c + 1];        // Current character, next character
+        const cc = str[c], nc = str[c + 1];        // Current character, next character
         arr[row] = arr[row] || [];             // Create a new row if necessary
         arr[row][col] = arr[row][col] || '';   // Create a new column (start with empty string) if necessary
 
@@ -112,14 +112,16 @@ export function parseCsv(str: string) {
 
 export async function parseExcel(file: Blob): Promise<string[][]> {
     const workbook = XSLX.read(await file.arrayBuffer(), { dense: true });
-    const data: (CellObject | string)[][] = workbook.Sheets[workbook.SheetNames[0]]['!data'];
+    const data: (CellObject | string)[][] | undefined = workbook.Sheets[workbook.SheetNames[0]]['!data'];
+    if (data === undefined) {
+        throw new TypeError('workbook missing sheet');
+    }
     data.shift(); // skip header
     // modifying the array in place is probably more efficient than a map
-    for (let i = 0; i < data.length; ++i) {
-        const r = data[i];
+    for (const r of data) {
         for (let j = 0; j < r.length; ++j) {
             if (r[j] !== undefined) {
-                r[j] = (r[j] as CellObject).w;
+                r[j] = (r[j] as CellObject).w ?? '';
             }
         }
     }

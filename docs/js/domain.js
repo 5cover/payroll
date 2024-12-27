@@ -5,7 +5,7 @@ export const maxWorkTime = 10 * timePerHour;
 /**
  * @return A 2-uple of the work time per date only, and the warnings per date only.
  */
-export function getWorkingHours(key, checks) {
+export function getWorkTime(key, checks) {
     const warnings = new DefaultMap(() => []);
     const workTimes = new DefaultMap(() => 0);
     const dateKey = primitivizeDateOnly;
@@ -14,8 +14,6 @@ export function getWorkingHours(key, checks) {
     for (let i = 0; i < checks.length; ++i) {
         const d = checks[i];
         if (working) {
-            if (lastClockIn === null)
-                throw Error('bug');
             let dayDiff = dateDayDiff(d, lastClockIn);
             if (dayDiff) {
                 // make previous work until 23:59
@@ -58,7 +56,7 @@ export function getWorkingHours(key, checks) {
 }
 export function parseWorkerChecks(rows) {
     const workingHours = new DefaultMap(() => []);
-    for (const [department, name, no, dateTime, locationId, idNumber, verifyCode, cardNo] of rows) {
+    for (const [department, name, no, dateTime, /* locationId */ , idNumber, /* verifyCode */ , /* cardNo */] of rows) {
         const key = primitivizeKey([department, name, no, ...parseIdNumber(idNumber)]);
         const date = parseDateTime(dateTime);
         workingHours.get(key).push(date);

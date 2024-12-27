@@ -17,3 +17,5 @@ SheetJS
 ## Parse CSV
 
 Aggregate CSV and agrregate into Map(Key, List(DateTime))
+
+## Use typescript

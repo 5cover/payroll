@@ -2,7 +2,7 @@ export function primitivizeDateOnly(date) {
     return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 }
 export function deprimitivizeDateOnly(date) {
-    let [y, m, d] = date.split('-', 3);
+    const [y, m, d] = date.split('-', 3);
     return new Date(+y, +m, +d);
 }
 export function primitivizeKey(key) {

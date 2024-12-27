@@ -11,5 +11,3 @@ parsing and xls generation
 ## Show summary with warnings
 
 And action buttons : allow and disallow (find better terms)
-
-## Use typescript

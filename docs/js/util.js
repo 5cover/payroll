@@ -60,7 +60,7 @@ export function parseCsv(str) {
     let quote = false; // 'true' means we're inside a quoted field
     // Iterate over each character, keep track of current row and column (of the returned array)
     for (let row = 0, col = 0, c = 0; c < str.length; c++) {
-        let cc = str[c], nc = str[c + 1]; // Current character, next character
+        const cc = str[c], nc = str[c + 1]; // Current character, next character
         arr[row] = arr[row] || []; // Create a new row if necessary
         arr[row][col] = arr[row][col] || ''; // Create a new column (start with empty string) if necessary
         // If the current character is a quotation mark, and we're inside a
@@ -105,13 +105,15 @@ export function parseCsv(str) {
 export async function parseExcel(file) {
     const workbook = XSLX.read(await file.arrayBuffer(), { dense: true });
     const data = workbook.Sheets[workbook.SheetNames[0]]['!data'];
+    if (data === undefined) {
+        throw new TypeError('workbook missing sheet');
+    }
     data.shift(); // skip header
     // modifying the array in place is probably more efficient than a map
-    for (let i = 0; i < data.length; ++i) {
-        const r = data[i];
+    for (const r of data) {
         for (let j = 0; j < r.length; ++j) {
             if (r[j] !== undefined) {
-                r[j] = r[j].w;
+                r[j] = r[j].w ?? '';
             }
         }
     }
