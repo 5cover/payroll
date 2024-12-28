@@ -113,7 +113,7 @@ export default class ResultsView {
 
     #addWarning(rowId: string, warning: string) {
         const row = this.#tableWarnings.insertRow();
-        row.insertCell().innerHTML = `<button type="button">Allow</button>`;
+        //row.insertCell().innerHTML = `<button type="button">Allow</button>`; // todo
         row.insertCell().innerHTML = `<a href="#${rowId}">${rowId}</a>`;
         row.insertCell().textContent = warning;
     }

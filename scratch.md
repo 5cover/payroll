@@ -1,12 +1,12 @@
 # Scratch
 
-## Export XLS
-
 ## Progress status
 
 parsing and xls generation
 
-## Show max time in red outside
+## Export XLS
+
+Show max time in red in generated xls
 
 ## Show summary with warnings
 
