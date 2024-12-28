@@ -1,11 +1,27 @@
-import { primitivizeDateOnly, primitivizeKey } from './prim.js';
-import { notnull, chday, dateDayDiff, dateTimeUntil, DefaultMap, timePerDay, timePerMinute, timePerHour, formatHms } from './util.js';
+import { DefaultObjectMap } from './Map.js';
+import { notnull, chday, dateDayDiff, dateTimeUntil, timePerDay, timePerMinute, timePerHour, formatHms } from './util.js';
 export const minWorkTime = 10 * timePerMinute;
 export const maxWorkTime = 10 * timePerHour;
-export function getWorkTime(key, checks) {
-    const warnings = new DefaultMap(() => []);
-    const workTimes = new DefaultMap(() => 0);
-    const dateKey = primitivizeDateOnly;
+;
+export function parseWorkerChecks(rows) {
+    const workingHours = new DefaultObjectMap(() => [], JSON.stringify, JSON.parse);
+    for (const [department, name, no, dateTime, , idNumber, ,] of rows) {
+        workingHours
+            .get({ department: department, name: name, no: no, idNumber: parseIdNumber(idNumber) })
+            .push(parseDateTime(dateTime));
+    }
+    return workingHours;
+}
+export function getWorkTime(emp, checks) {
+    function dateOnlyKtop(date) {
+        return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+    }
+    function dateOnlyPtok(date) {
+        const [y, m, d] = date.split('-', 3);
+        return new Date(+y, +m, +d);
+    }
+    const warnings = new DefaultObjectMap(() => [], dateOnlyKtop, dateOnlyPtok);
+    const workTimes = new DefaultObjectMap(() => 0, dateOnlyKtop, dateOnlyPtok);
     let working = false;
     let lastClockIn = null;
     for (let i = 0; i < checks.length; ++i) {
@@ -13,17 +29,17 @@ export function getWorkTime(key, checks) {
         if (working) {
             let dayDiff = dateDayDiff(d, lastClockIn);
             if (dayDiff) {
-                workTimes.map(dateKey(lastClockIn), v => v + dateTimeUntil(lastClockIn, 23, 59, 0));
+                workTimes.map(lastClockIn, v => v + dateTimeUntil(lastClockIn, 23, 59, 0));
                 while (dayDiff > 1) {
                     chday(lastClockIn, 1);
-                    workTimes.map(dateKey(lastClockIn), v => v + timePerDay - timePerMinute);
+                    workTimes.map(lastClockIn, v => v + timePerDay - timePerMinute);
                     dayDiff--;
                 }
                 lastClockIn = new Date(d);
                 lastClockIn.setHours(0, 0, 0);
                 working = true;
             }
-            workTimes.map(dateKey(d), v => d.getTime() - lastClockIn.getTime() + v);
+            workTimes.map(d, v => d.getTime() - lastClockIn.getTime() + v);
         }
         else {
             if (i + 1 < checks.length) {
@@ -37,7 +53,7 @@ export function getWorkTime(key, checks) {
                     continue;
                 }
                 function warn(msg) {
-                    warnings.get(dateKey(dnext)).push(`employee entered at ${d.toLocaleString()}, worked until ${dnext.toLocaleTimeString()} (for ${formatHms(dnext.getTime() - d.getTime())}): ` + msg);
+                    warnings.get(dnext).push(`employee entered at ${d.toLocaleString()}, worked until ${dnext.toLocaleTimeString()} (for ${formatHms(dnext.getTime() - d.getTime())}): ` + msg);
                 }
             }
             lastClockIn = d;
@@ -45,15 +61,6 @@ export function getWorkTime(key, checks) {
         working = !working;
     }
     return [workTimes, warnings];
-}
-export function parseWorkerChecks(rows) {
-    const workingHours = new DefaultMap(() => []);
-    for (const [department, name, no, dateTime, , idNumber, ,] of rows) {
-        const key = primitivizeKey([department, name, no, ...parseIdNumber(idNumber)]);
-        const date = parseDateTime(dateTime);
-        workingHours.get(key).push(date);
-    }
-    return workingHours;
 }
 function parseDateTime(input) {
     const pattern = /^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})$/;
@@ -63,5 +70,5 @@ function parseDateTime(input) {
 function parseIdNumber(input) {
     const pattern = /^([A-Z]+)(\d*)$/;
     const [, c, n] = notnull(pattern.exec(input), 'failed to parse id number');
-    return [c, n];
+    return [c, +n];
 }

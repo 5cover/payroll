@@ -11,7 +11,6 @@ const resultTable = new ResultsView(
     requireElementById('table-warnings') as HTMLTableElement,
 );
 
-
 buttonClear.addEventListener('click', () => {
     buttonClear.disabled = true;
     resultTable.clear();

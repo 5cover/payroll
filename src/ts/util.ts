@@ -51,29 +51,6 @@ export function dateOnly(date: Date) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
-export class DefaultMap<TKey, TValue> extends Map<TKey, TValue> {
-    #default;
-
-    constructor(defaultFactory: () => TValue) {
-        super();
-        this.#default = defaultFactory;
-    }
-
-    get(key: TKey) {
-        const value = super.get(key);
-        if (value !== undefined) {
-            return value;
-        }
-        const def = this.#default();
-        this.set(key, def);
-        return def;
-    }
-
-    map(key: TKey, f: (value: TValue) => TValue) {
-        this.set(key, f(this.get(key)));
-    }
-}
-
 export function parseCsv(str: string) {
     const arr: string[][] = [];
     let quote = false;  // 'true' means we're inside a quoted field

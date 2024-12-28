@@ -36,25 +36,6 @@ export function dateTimeUntil(date, h, m, s) {
 export function dateOnly(date) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
-export class DefaultMap extends Map {
-    #default;
-    constructor(defaultFactory) {
-        super();
-        this.#default = defaultFactory;
-    }
-    get(key) {
-        const value = super.get(key);
-        if (value !== undefined) {
-            return value;
-        }
-        const def = this.#default();
-        this.set(key, def);
-        return def;
-    }
-    map(key, f) {
-        this.set(key, f(this.get(key)));
-    }
-}
 export function parseCsv(str) {
     const arr = [];
     let quote = false;

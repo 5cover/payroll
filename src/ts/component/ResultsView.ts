@@ -1,15 +1,19 @@
-import { getWorkTime, Key } from "../domain.js";
-import { deprimitivizeDateOnly, deprimitivizeKey } from "../prim.js";
+import { Employee, getWorkTime } from "../domain.js";
 import { formatHms, insertHeaderCell } from "../util.js";
 
-const resultKeyHeaders = ['Department', 'Name', 'No.', 'ID Number'];
-const resultIdNumberColIndex = 3;
-const resultColumnCount = 5;
-const resultHeaderColumnCount = 2;
+const columnCount = 5;
+const headerColumnCount = 2;
+
+const empProperties: [keyof Employee, string][] = [
+    ['department', 'Department'],
+    ['name', 'Name'],
+    ['no', 'No.'],
+    ['idNumber', 'ID Number'],
+];
 
 export default class ResultsView {
-    #tableResults: HTMLTableElement;
-    #tableWarnings: HTMLTableElement;
+    readonly #tableResults: HTMLTableElement;
+    readonly #tableWarnings: HTMLTableElement;
     constructor(resultTable: HTMLTableElement, warningsTable: HTMLTableElement) {
         this.#tableResults = resultTable;
         this.#tableWarnings = warningsTable;
@@ -20,17 +24,16 @@ export default class ResultsView {
         this.#tableWarnings.textContent = '';
     }
 
-    addResult(workerChecks: Map<string, Date[]>) {
+    addResult(workerChecks: Map<Employee, Date[]>) {
         let iWorker = 0;
-        for (const [pkey, checks] of workerChecks.entries()) {
-            const key = deprimitivizeKey(pkey);
-            const [workTimes, warnings] = getWorkTime(key, checks);
+        for (const [emp, checks] of workerChecks.entries()) {
+            const [workTimes, warnings] = getWorkTime(emp, checks);
 
             let iWorkTime = 0;
-            for (const [dateKey, workTime] of workTimes) {
-                const row = this.#addResultRow(workTimes.size, iWorker, iWorkTime++, key, deprimitivizeDateOnly(dateKey), workTime);
+            for (const [date, workTime] of workTimes) {
+                const row = this.#addResultRow(workTimes.size, iWorker, iWorkTime++, emp, date, workTime);
 
-                const warns = warnings.get(dateKey);
+                const warns = warnings.get(date);
                 if (warns.length > 0) {
                     this.#markResultRowWarning(row, warns);
                     for (const w of warns) {
@@ -39,18 +42,18 @@ export default class ResultsView {
                 }
             }
 
-            if (iWorkTime < resultKeyHeaders.length) {
-                const hr = this.#addKeyPaddingRow(iWorkTime, key);
+            if (iWorkTime < empProperties.length) {
+                const hr = this.#addKeyPaddingRow(iWorkTime, emp);
                 const padc = hr.insertCell();
-                padc.rowSpan = resultKeyHeaders.length - iWorkTime++;
-                padc.colSpan = resultColumnCount - hr.cells.length + 1;
+                padc.rowSpan = empProperties.length - iWorkTime++;
+                padc.colSpan = columnCount - hr.cells.length + 1;
             }
-            while (iWorkTime < resultKeyHeaders.length) {
-                this.#addKeyPaddingRow(iWorkTime++, key);
+            while (iWorkTime < empProperties.length) {
+                this.#addKeyPaddingRow(iWorkTime++, emp);
             }
 
             // margin row
-            this.#tableResults.insertRow().insertCell().colSpan = resultColumnCount;
+            this.#tableResults.insertRow().insertCell().colSpan = columnCount;
 
             iWorker++;
         }
@@ -58,13 +61,9 @@ export default class ResultsView {
         this.#addHeaders();
     }
 
-    #rowId(iWorker: number, iWorkTime: number) {
-        return `${iWorker + 1}.${iWorkTime + 1}`;
-    }
-
-    #addKeyPaddingRow(iWorkTime: number, key: Key) {
+    #addKeyPaddingRow(iWorkTime: number, emp: Employee) {
         const hr = this.#tableResults.insertRow();
-        this.#fillHeaderRow(hr, iWorkTime, key);
+        this.#fillHeaderRow(hr, iWorkTime, emp);
         return hr;
     }
 
@@ -73,8 +72,8 @@ export default class ResultsView {
         if (this.#tableResults.rows.length > 0) {
             const row = this.#tableResults.insertRow(0);
             const thKey = insertHeaderCell(row);
-            thKey.colSpan = resultHeaderColumnCount;
-            thKey.textContent = 'Key';
+            thKey.colSpan = headerColumnCount;
+            thKey.textContent = 'Employee';
             insertHeaderCell(row).textContent = '#';
             insertHeaderCell(row).textContent = 'Date';
             insertHeaderCell(row).textContent = 'Work time';
@@ -88,14 +87,14 @@ export default class ResultsView {
         }
     }
 
-    #addResultRow(size: number, iWorker: number, iWorkTime: number, key: Key, date: Date, workedFor: number) {
+    #addResultRow(size: number, iWorker: number, iWorkTime: number, emp: Employee, date: Date, workedFor: number) {
         const row = this.#tableResults.insertRow();
-        if (iWorkTime < resultKeyHeaders.length) {
-            this.#fillHeaderRow(row, iWorkTime, key);
-        } else if (iWorkTime == resultKeyHeaders.length) {
+        if (iWorkTime < empProperties.length) {
+            this.#fillHeaderRow(row, iWorkTime, emp);
+        } else if (iWorkTime == empProperties.length) {
             const padc = row.insertCell();
-            padc.colSpan = resultHeaderColumnCount;
-            padc.rowSpan = size - resultKeyHeaders.length;
+            padc.colSpan = headerColumnCount;
+            padc.rowSpan = size - empProperties.length;
         }
         row.insertCell().textContent = row.id = this.#rowId(iWorker, iWorkTime);
         row.insertCell().textContent = date.toLocaleDateString();
@@ -105,7 +104,7 @@ export default class ResultsView {
 
     #markResultRowWarning(row: HTMLTableRowElement, warnings: string[]) {
         // 5 ; 2
-        for (let i = row.cells.length - 1; i > row.cells.length - resultColumnCount + resultHeaderColumnCount; --i) {
+        for (let i = row.cells.length - 1; i > row.cells.length - columnCount + headerColumnCount; --i) {
             const c = row.cells.item(i)!;
             c.className = 'bg-warning';
             c.title = warnings.join('\n');
@@ -119,14 +118,19 @@ export default class ResultsView {
         row.insertCell().textContent = warning;
     }
 
-    #fillHeaderRow(row: HTMLTableRowElement, iWorkTime: number, key: Key) {
-        insertHeaderCell(row).textContent = resultKeyHeaders[iWorkTime];
+    #fillHeaderRow(row: HTMLTableRowElement, iWorkTime: number, emp: Employee) {
+        const [prop, name] = empProperties[iWorkTime];
+        insertHeaderCell(row).textContent = name;
         const kc = row.insertCell();
-        if (iWorkTime == resultIdNumberColIndex) {
-            kc.textContent = key[iWorkTime] + key[iWorkTime + 1];
+        if (prop === 'idNumber') {
+            kc.textContent = emp[prop][0] + emp[prop][1];
         } else {
-            kc.textContent = key[iWorkTime];
+            kc.textContent = emp[prop];
         }
+    }
+
+    #rowId(iWorker: number, iWorkTime: number) {
+        return `${iWorker + 1}.${iWorkTime + 1}`;
     }
 
 }
