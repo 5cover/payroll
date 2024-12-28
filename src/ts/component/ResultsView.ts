@@ -26,6 +26,9 @@ export default class ResultsView {
 
     addResult(workerChecks: Map<Employee, Date[]>) {
         let iWorker = 0;
+
+        const resultWasEmpty = this.#tableResults.rows.length == 0, warningsWasEmpty = this.#tableWarnings.rows.length == 0;
+
         for (const [emp, checks] of workerChecks.entries()) {
             const [workTimes, warnings] = getWorkTime(emp, checks);
 
@@ -58,7 +61,8 @@ export default class ResultsView {
             iWorker++;
         }
 
-        this.#addHeaders();
+        if (resultWasEmpty) this.#addResultHeader();
+        if (warningsWasEmpty) this.#addWarningHeader();
     }
 
     #addKeyPaddingRow(iWorkTime: number, emp: Employee) {
@@ -67,7 +71,7 @@ export default class ResultsView {
         return hr;
     }
 
-    #addHeaders() {
+    #addResultHeader() {
         this.#tableResults.createCaption().textContent = 'Work times';
         if (this.#tableResults.rows.length > 0) {
             const row = this.#tableResults.insertRow(0);
@@ -78,8 +82,12 @@ export default class ResultsView {
             insertHeaderCell(row).textContent = 'Date';
             insertHeaderCell(row).textContent = 'Work time';
         }
+
+    }
+
+    #addWarningHeader() {
+        this.#tableWarnings.createCaption().textContent = 'Warnings';
         if (this.#tableWarnings.rows.length > 0) {
-            this.#tableWarnings.createCaption().textContent = 'Warnings';
             const row = this.#tableWarnings.insertRow(0);
             insertHeaderCell(row).textContent = 'Actions';
             insertHeaderCell(row).textContent = 'Location';
