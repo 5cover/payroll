@@ -27,7 +27,8 @@ export default class ResultsView {
     addResult(workerChecks: Map<Employee, Date[]>) {
         let iWorker = 0;
 
-        const resultWasEmpty = this.#tableResults.rows.length == 0, warningsWasEmpty = this.#tableWarnings.rows.length == 0;
+        const resultWasEmpty = this.#tableResults.rows.length == 0,
+            warningsWasEmpty = this.#tableWarnings.rows.length == 0;
 
         for (const [emp, checks] of workerChecks.entries()) {
             const [workTimes, warnings] = getWorkTime(emp, checks);
