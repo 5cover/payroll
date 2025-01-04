@@ -29,7 +29,7 @@ export interface WorkTime {
 export function getWarningMessage(w: Warning) {
     switch (w.kind) {
         case WarningKind.ForgotToBadge:
-            return `employee entered at ${w.dateStart.toLocaleString()}, worked until ${w.dateEnd.toLocaleTimeString()} (for ${formatHms(w.dateEnd.getTime() - w.dateStart.getTime())}): likely forgot to badge`;
+            return `employee entered at ${w.dateStart.toLocaleString()}, worked until ${w.dateEnd.toLocaleString()} (for ${formatHms(w.dateEnd.getTime() - w.dateStart.getTime())}): likely forgot to badge`;
     }
 }
 
