@@ -20,7 +20,7 @@ inputFile.addEventListener('change', function () {
     void (async () => {
         if (!this.files) return;
         buttonClear.disabled = false;
-        if (!resultTable.isEmpty) {
+        if (resultTable.isEmpty) {
             resultTable.addHeaders();
         }
         for (const file of this.files ?? []) {
