@@ -1,5 +1,4 @@
 import * as XSLX from "./lib/xlsx.js"
-import { CellObject } from "./lib/xlsx.js";
 
 export const timePerDay = 86400_000;
 export const timePerHour = 3600_000;
@@ -88,7 +87,7 @@ export function parseCsv(str: string) {
 
 export async function parseExcel(file: Blob): Promise<string[][]> {
     const workbook = XSLX.read(await file.arrayBuffer(), { dense: true });
-    const data: (CellObject | string)[][] | undefined = workbook.Sheets[workbook.SheetNames[0]]['!data'];
+    const data: (XSLX.CellObject | string)[][] | undefined = workbook.Sheets[workbook.SheetNames[0]]['!data'];
     if (data === undefined) {
         throw new TypeError('workbook missing sheet');
     }
@@ -97,7 +96,7 @@ export async function parseExcel(file: Blob): Promise<string[][]> {
     for (const r of data) {
         for (let j = 0; j < r.length; ++j) {
             if (r[j] !== undefined) {
-                r[j] = (r[j] as CellObject).w ?? '';
+                r[j] = (r[j] as XSLX.CellObject).w ?? '';
             }
         }
     }
