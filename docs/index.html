@@ -7,7 +7,6 @@
     <title>Working hours calculator</title>
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/index.css">
-    <script type="module" src="https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.js"></script>
     <script type="module" src="js/index.js"></script>
 </head>
 
@@ -19,7 +18,7 @@
     <h2>1. Upload the working hours sheet</h2>
     <p><em>Multiple files can be imported at once. All processing is done locally.</em></p>
     <p>
-        <input type="file" id="input-file" accept=".xls,.csv,text/csv" multiple>
+        <input type="file" id="input-file" accept=".xls,.xlsx,.csv,text/csv" multiple>
     </p>
     <p id="p-input-error" class="error"></p>
     <h2>2. Results</h2>

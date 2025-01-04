@@ -1,4 +1,4 @@
-import { DefaultMap, DefaultObjectMap } from './Map.js';
+import { DefaultMap, DefaultObjectMap, ObjectMap } from './Map.js';
 import { notnull, chday, dateDayDiff, dateTimeUntil, timePerDay, timePerMinute, timePerHour, formatHms } from './util.js';
 
 export const minWorkTime = 10 * timePerMinute;
@@ -11,6 +11,28 @@ export interface Employee {
     idNumber: [string, number],
 };
 
+export enum WarningKind {
+    ForgotToBadge,
+}
+
+export interface Warning {
+    kind: WarningKind;
+    dateEnd: Date;
+    dateStart: Date;
+}
+
+export interface WorkTime {
+    workedFor: number;
+    warnings: Warning[];
+}
+
+export function getWarningMessage(w: Warning) {
+    switch (w.kind) {
+        case WarningKind.ForgotToBadge:
+            return `employee entered at ${w.dateStart.toLocaleString()}, worked until ${w.dateEnd.toLocaleTimeString()} (for ${formatHms(w.dateEnd.getTime() - w.dateStart.getTime())}): likely forgot to badge`;
+    }
+}
+
 export function parseWorkerChecks(rows: string[][]) {
     const workingHours = new DefaultObjectMap<Employee, Date[], string>(() => [], JSON.stringify, JSON.parse);
     for (const [department, name, no, dateTime, /* locationId */, idNumber, /* verifyCode */, /* cardNo */] of rows) {
@@ -21,10 +43,19 @@ export function parseWorkerChecks(rows: string[][]) {
     return workingHours;
 }
 
+export function getResults(workerChecks: Map<Employee, Date[]>)
+{
+    const result = new ObjectMap<Employee, DefaultMap<Date, WorkTime>, string>(JSON.stringify, JSON.parse);
+    for (const [emp, checks] of workerChecks.entries()) {
+        result.set(emp, getWorkTime(emp, checks));
+    }
+    return result;
+}
+
 /**
  * @return A 2-uple of the work time per date only, and the warnings per date only.
  */
-export function getWorkTime(emp: Employee, checks: Date[]): [DefaultMap<Date, number>, DefaultMap<Date, string[]>] {
+export function getWorkTime(emp: Employee, checks: Date[]) {
     function dateOnlyKtop(date: Date) {
         return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
     }
@@ -33,8 +64,7 @@ export function getWorkTime(emp: Employee, checks: Date[]): [DefaultMap<Date, nu
         return new Date(+y, +m, +d);
     }
 
-    const warnings = new DefaultObjectMap<Date, string[], string>(() => [], dateOnlyKtop, dateOnlyPtok);
-    const workTimes = new DefaultObjectMap<Date, number, string>(() => 0, dateOnlyKtop, dateOnlyPtok);
+    const workTimes = new DefaultObjectMap<Date, WorkTime, string>(() => ({ workedFor: 0, warnings: [] }), dateOnlyKtop, dateOnlyPtok);
 
     let working = false;
     let lastClockIn: Date = null!;
@@ -45,12 +75,12 @@ export function getWorkTime(emp: Employee, checks: Date[]): [DefaultMap<Date, nu
             let dayDiff = dateDayDiff(d, lastClockIn);
             if (dayDiff) {
                 // make previous work until 23:59
-                workTimes.map(lastClockIn, v => v + dateTimeUntil(lastClockIn, 23, 59, 0));
+                workTimes.get(lastClockIn).workedFor += dateTimeUntil(lastClockIn, 23, 59, 0);
 
                 // account for full 24hours of work
                 while (dayDiff > 1) {
                     chday(lastClockIn, 1);
-                    workTimes.map(lastClockIn, v => v + timePerDay - timePerMinute); // work full days 23:59
+                    workTimes.get(lastClockIn).workedFor += timePerDay - timePerMinute; // work full days 23:59
                     dayDiff--;
                 }
 
@@ -59,7 +89,7 @@ export function getWorkTime(emp: Employee, checks: Date[]): [DefaultMap<Date, nu
                 lastClockIn.setHours(0, 0, 0);
                 working = true;
             }
-            workTimes.map(d, v => d.getTime() - lastClockIn.getTime() + v);
+            workTimes.get(d).workedFor += d.getTime() - lastClockIn.getTime();
         } else {
             // Check for inconsistencies
             if (i + 1 < checks.length) {
@@ -67,16 +97,16 @@ export function getWorkTime(emp: Employee, checks: Date[]): [DefaultMap<Date, nu
                 const diff = dnext.getTime() - d.getTime();
 
                 if (diff < minWorkTime) {
-                    //warn('likely double badged'); // disabled as it is insignificant
+                    // unreported as it is insignificant
                     continue;
                 }
                 else if (diff > maxWorkTime) {
-                    warn('likely forgot to badge');
+                    workTimes.get(dnext).warnings.push({
+                        kind: WarningKind.ForgotToBadge,
+                        dateStart: d,
+                        dateEnd: dnext,
+                    });
                     continue;
-                }
-
-                function warn(msg: string) {
-                    warnings.get(dnext).push(`employee entered at ${d.toLocaleString()}, worked until ${dnext.toLocaleTimeString()} (for ${formatHms(dnext.getTime() - d.getTime())}): ` + msg);
                 }
             }
 
@@ -85,7 +115,7 @@ export function getWorkTime(emp: Employee, checks: Date[]): [DefaultMap<Date, nu
         working = !working;
     }
 
-    return [workTimes, warnings];
+    return workTimes;
 }
 
 function parseDateTime(input: string) {

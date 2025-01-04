@@ -71,3 +71,54 @@ export class DefaultObjectMap {
         return this.#map[Symbol.toStringTag];
     }
 }
+export class ObjectMap {
+    #ktop;
+    #ptok;
+    #map;
+    constructor(keyToPrim, primToKey) {
+        this.#ktop = keyToPrim;
+        this.#ptok = primToKey;
+        this.#map = new Map();
+    }
+    get size() {
+        return this.#map.size;
+    }
+    clear() {
+        this.#map.clear();
+    }
+    delete(key) {
+        return this.#map.delete(this.#ktop(key));
+    }
+    forEach(callbackfn, thisArg) {
+        this.#map.forEach((v, k) => callbackfn.call(thisArg === undefined ? this : thisArg, v, this.#ptok(k), this));
+    }
+    get(key) {
+        return this.#map.get(this.#ktop(key));
+    }
+    has(key) {
+        return this.#map.has(this.#ktop(key));
+    }
+    set(key, value) {
+        this.#map.set(this.#ktop(key), value);
+        return this;
+    }
+    *entries() {
+        for (const [k, v] of this.#map.entries()) {
+            yield [this.#ptok(k), v];
+        }
+    }
+    *keys() {
+        for (const k of this.#map.keys()) {
+            yield this.#ptok(k);
+        }
+    }
+    values() {
+        return this.#map.values();
+    }
+    [Symbol.iterator]() {
+        return this.entries();
+    }
+    get [Symbol.toStringTag]() {
+        return this.#map[Symbol.toStringTag];
+    }
+}

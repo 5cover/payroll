@@ -1,6 +1,5 @@
-import type { CellObject } from './xlsx';
-
-declare const XSLX: typeof import('./xlsx');
+import * as XSLX from "./lib/xlsx.js"
+import { CellObject } from "./lib/xlsx.js";
 
 export const timePerDay = 86400_000;
 export const timePerHour = 3600_000;

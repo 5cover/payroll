@@ -1,4 +1,4 @@
-import { getWorkTime } from "../domain.js";
+import { getWarningMessage } from "../domain.js";
 import { formatHms, insertHeaderCell } from "../util.js";
 const columnCount = 5;
 const headerColumnCount = 2;
@@ -19,19 +19,20 @@ export default class ResultsView {
         this.#tableResults.textContent = '';
         this.#tableWarnings.textContent = '';
     }
-    addResult(workerChecks) {
+    get isEmpty() {
+        return this.#tableResults.rows.length == 0;
+    }
+    addResults(result) {
         let iWorker = 0;
-        const resultWasEmpty = this.#tableResults.rows.length == 0, warningsWasEmpty = this.#tableWarnings.rows.length == 0;
-        for (const [emp, checks] of workerChecks.entries()) {
-            const [workTimes, warnings] = getWorkTime(emp, checks);
+        for (const [emp, workTimes] of result.entries()) {
             let iWorkTime = 0;
-            for (const [date, workTime] of workTimes) {
-                const row = this.#addResultRow(workTimes.size, iWorker, iWorkTime++, emp, date, workTime);
-                const warns = warnings.get(date);
-                if (warns.length > 0) {
-                    this.#markResultRowWarning(row, warns);
-                    for (const w of warns) {
-                        this.#addWarning(row.id, w);
+            for (const [date, workTime] of workTimes.entries()) {
+                const row = this.#addResultRow(workTimes.size, iWorker, iWorkTime++, emp, date, workTime.workedFor);
+                if (workTime.warnings.length > 0) {
+                    const messages = workTime.warnings.map(getWarningMessage);
+                    this.#markResultRowWarning(row, messages);
+                    for (const msg of messages) {
+                        this.#addWarning(row.id, msg);
                     }
                 }
             }
@@ -47,19 +48,15 @@ export default class ResultsView {
             this.#tableResults.insertRow().insertCell().colSpan = columnCount;
             iWorker++;
         }
-        if (resultWasEmpty)
-            this.#addResultHeader();
-        if (warningsWasEmpty)
-            this.#addWarningHeader();
     }
     #addKeyPaddingRow(iWorkTime, emp) {
         const hr = this.#tableResults.insertRow();
         this.#fillHeaderRow(hr, iWorkTime, emp);
         return hr;
     }
-    #addResultHeader() {
+    addHeaders() {
         this.#tableResults.createCaption().textContent = 'Work times';
-        if (this.#tableResults.rows.length > 0) {
+        {
             const row = this.#tableResults.insertRow(0);
             const thKey = insertHeaderCell(row);
             thKey.colSpan = headerColumnCount;
@@ -68,10 +65,8 @@ export default class ResultsView {
             insertHeaderCell(row).textContent = 'Date';
             insertHeaderCell(row).textContent = 'Work time';
         }
-    }
-    #addWarningHeader() {
         this.#tableWarnings.createCaption().textContent = 'Warnings';
-        if (this.#tableWarnings.rows.length > 0) {
+        {
             const row = this.#tableWarnings.insertRow(0);
             insertHeaderCell(row).textContent = 'Actions';
             insertHeaderCell(row).textContent = 'Location';
@@ -93,18 +88,18 @@ export default class ResultsView {
         row.insertCell().textContent = formatHms(workedFor);
         return row;
     }
-    #markResultRowWarning(row, warnings) {
+    #markResultRowWarning(row, messages) {
         for (let i = row.cells.length - 1; i > row.cells.length - columnCount + headerColumnCount; --i) {
             const c = row.cells.item(i);
             c.className = 'bg-warning';
-            c.title = warnings.join('\n');
+            c.title = messages.join('\n');
         }
     }
-    #addWarning(rowId, warning) {
+    #addWarning(rowId, message) {
         const row = this.#tableWarnings.insertRow();
         row.insertCell();
         row.insertCell().innerHTML = `<a href="#${rowId}">${rowId}</a>`;
-        row.insertCell().textContent = warning;
+        row.insertCell().textContent = message;
     }
     #fillHeaderRow(row, iWorkTime, emp) {
         const [prop, name] = empProperties[iWorkTime];
