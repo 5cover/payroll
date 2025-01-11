@@ -25,8 +25,10 @@ export default class ResultsView {
     addResults(result) {
         let iWorker = 0;
         for (const [emp, workTimes] of result.entries()) {
+            let totalWorkTime = 0;
             let iWorkTime = 0;
             for (const [date, workTime] of workTimes.entries()) {
+                totalWorkTime += workTime.workedFor;
                 const row = this.#addResultRow(workTimes.size, iWorker, iWorkTime++, emp, date, workTime.workedFor);
                 if (workTime.warnings.length > 0) {
                     const messages = workTime.warnings.map(getWarningMessage);
@@ -45,6 +47,11 @@ export default class ResultsView {
             while (iWorkTime < empProperties.length) {
                 this.#addKeyPaddingRow(iWorkTime++, emp);
             }
+            const totalRow = this.#tableResults.insertRow();
+            const totalHeaderCell = insertHeaderCell(totalRow);
+            totalHeaderCell.textContent = 'Total';
+            totalHeaderCell.colSpan = 4;
+            totalRow.insertCell().textContent = formatHms(totalWorkTime);
             this.#tableResults.insertRow().insertCell().colSpan = columnCount;
             iWorker++;
         }

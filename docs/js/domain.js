@@ -10,7 +10,7 @@ export var WarningKind;
 export function getWarningMessage(w) {
     switch (w.kind) {
         case WarningKind.ForgotToBadge:
-            return `employee entered at ${w.dateStart.toLocaleString()}, worked until ${w.dateEnd.toLocaleTimeString()} (for ${formatHms(w.dateEnd.getTime() - w.dateStart.getTime())}): likely forgot to badge`;
+            return `employee entered at ${w.dateStart.toLocaleString()}, worked until ${w.dateEnd.toLocaleString()} (for ${formatHms(w.dateEnd.getTime() - w.dateStart.getTime())}): likely forgot to badge`;
     }
 }
 export function parseWorkerChecks(rows) {
