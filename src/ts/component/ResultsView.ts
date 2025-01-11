@@ -15,6 +15,9 @@ const empProperties: [keyof Employee, string][] = [
 export default class ResultsView {
     readonly #tableResults: HTMLTableElement;
     readonly #tableWarnings: HTMLTableElement;
+    
+    #resultsCount = 0;
+
     constructor(resultTable: HTMLTableElement, warningsTable: HTMLTableElement) {
         this.#tableResults = resultTable;
         this.#tableWarnings = warningsTable;
@@ -30,7 +33,7 @@ export default class ResultsView {
     }
 
     addResults(result: Map<Employee, DefaultMap<Date, WorkTime>>) {
-        let iWorker = 0;
+        let iWorker = this.#resultsCount++;
         
         for (const [emp, workTimes] of result.entries()) {
             let totalWorkTime = 0;
@@ -39,12 +42,10 @@ export default class ResultsView {
                 totalWorkTime += workTime.workedFor;
                 const row = this.#addResultRow(workTimes.size, iWorker, iWorkTime++, emp, date, workTime.workedFor);
 
-                if (workTime.warnings.length > 0) {
-                    const messages = workTime.warnings.map(getWarningMessage);
-                    this.#markResultRowWarning(row, messages);
-                    for (const msg of messages) {
-                        this.#addWarning(row.id, msg);
-                    }
+                if (workTime.warning !== undefined) {
+                    const msg = getWarningMessage(workTime.warning);
+                    this.#markResultRowWarning(row, msg);
+                    this.#addWarning(row.id, msg);
                 }
             }
 
@@ -112,11 +113,11 @@ export default class ResultsView {
         return row;
     }
 
-    #markResultRowWarning(row: HTMLTableRowElement, messages: string[]) {
+    #markResultRowWarning(row: HTMLTableRowElement, msg: string) {
         for (let i = row.cells.length - 1; i > row.cells.length - columnCount + headerColumnCount; --i) {
             const c = row.cells.item(i)!;
             c.className = 'bg-warning';
-            c.title = messages.join('\n');
+            c.title = msg;
         }
     }
 

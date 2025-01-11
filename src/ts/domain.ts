@@ -23,13 +23,13 @@ export interface Warning {
 
 export interface WorkTime {
     workedFor: number;
-    warnings: Warning[];
+    warning?: Warning;
 }
 
 export function getWarningMessage(w: Warning) {
     switch (w.kind) {
         case WarningKind.ForgotToBadge:
-            return `employee entered at ${w.dateStart.toLocaleString()}, worked until ${w.dateEnd.toLocaleString()} (for ${formatHms(w.dateEnd.getTime() - w.dateStart.getTime())}): likely forgot to badge`;
+            return `employee entered at ${w.dateStart.toLocaleString()}, worked until ${w.dateEnd.toLocaleString()} (for ${formatHms(w.dateEnd.getTime() - w.dateStart.getTime())}): likely forgot to badge exit`;
     }
 }
 
@@ -43,11 +43,10 @@ export function parseWorkerChecks(rows: string[][]) {
     return workingHours;
 }
 
-export function getResults(workerChecks: Map<Employee, Date[]>)
-{
+export function getResults(workerChecks: Map<Employee, Date[]>) {
     const result = new ObjectMap<Employee, DefaultMap<Date, WorkTime>, string>(JSON.stringify, JSON.parse);
     for (const [emp, checks] of workerChecks.entries()) {
-        result.set(emp, getWorkTime(emp, checks));
+        result.set(emp, getWorkTime(/* emp,  */checks));
     }
     return result;
 }
@@ -55,7 +54,7 @@ export function getResults(workerChecks: Map<Employee, Date[]>)
 /**
  * @return A 2-uple of the work time per date only, and the warnings per date only.
  */
-export function getWorkTime(emp: Employee, checks: Date[]) {
+function getWorkTime(/* emp: Employee,  */checks: Date[]) {
     function dateOnlyKtop(date: Date) {
         return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
     }
@@ -64,52 +63,45 @@ export function getWorkTime(emp: Employee, checks: Date[]) {
         return new Date(+y, +m, +d);
     }
 
-    const workTimes = new DefaultObjectMap<Date, WorkTime, string>(() => ({ workedFor: 0, warnings: [] }), dateOnlyKtop, dateOnlyPtok);
+    const workTimes = new DefaultObjectMap<Date, WorkTime, string>(() => ({ workedFor: 0 }), dateOnlyKtop, dateOnlyPtok);
 
     let working = false;
     let lastClockIn: Date = null!;
     for (let i = 0; i < checks.length; ++i) {
         const d = checks[i];
-
         if (working) {
-            let dayDiff = dateDayDiff(d, lastClockIn);
-            if (dayDiff) {
-                // make previous work until 23:59
-                workTimes.get(lastClockIn).workedFor += dateTimeUntil(lastClockIn, 23, 59, 0);
+            // d is a clockout
+            const workTime = d.getTime() - lastClockIn.getTime();
+            if (workTime >= minWorkTime) {
+                if (workTime <= maxWorkTime) {
+                    let dayDiff = dateDayDiff(d, lastClockIn);
+                    if (dayDiff) {
+                        // make previous work until 23:59
+                        workTimes.get(lastClockIn).workedFor += dateTimeUntil(lastClockIn, 23, 59, 0);
 
-                // account for full 24hours of work
-                while (dayDiff > 1) {
-                    chday(lastClockIn, 1);
-                    workTimes.get(lastClockIn).workedFor += timePerDay - timePerMinute; // work full days 23:59
-                    dayDiff--;
-                }
+                        // account for full 24hours of work
+                        while (dayDiff-- > 1) {
+                            chday(lastClockIn, 1);
+                            workTimes.get(lastClockIn).workedFor += timePerDay - timePerMinute; // work full days 23:59
+                        }
 
-                // make next work since midnight
-                lastClockIn = new Date(d);
-                lastClockIn.setHours(0, 0, 0);
-                working = true;
-            }
-            workTimes.get(d).workedFor += d.getTime() - lastClockIn.getTime();
-        } else {
-            // Check for inconsistencies
-            if (i + 1 < checks.length) {
-                const dnext = checks[i + 1];
-                const diff = dnext.getTime() - d.getTime();
-
-                if (diff < minWorkTime) {
-                    // unreported as it is insignificant
-                    continue;
-                }
-                else if (diff > maxWorkTime) {
-                    workTimes.get(dnext).warnings.push({
+                        // make next work since midnight
+                        lastClockIn = new Date(d);
+                        lastClockIn.setHours(0, 0, 0);
+                    }
+                    // lastClockIn may have changed so we need to recompuute the work time
+                    workTimes.get(d).workedFor += d.getTime() - lastClockIn.getTime();
+                } else {
+                    const wt = workTimes.get(d);
+                    wt.workedFor += maxWorkTime;
+                    wt.warning = {
                         kind: WarningKind.ForgotToBadge,
-                        dateStart: d,
-                        dateEnd: dnext,
-                    });
-                    continue;
+                        dateStart: checks[i - 1],
+                        dateEnd: d,
+                    };
                 }
             }
-
+        } else {
             lastClockIn = d;
         }
         working = !working;

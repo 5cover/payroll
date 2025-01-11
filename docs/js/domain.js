@@ -10,7 +10,7 @@ export var WarningKind;
 export function getWarningMessage(w) {
     switch (w.kind) {
         case WarningKind.ForgotToBadge:
-            return `employee entered at ${w.dateStart.toLocaleString()}, worked until ${w.dateEnd.toLocaleString()} (for ${formatHms(w.dateEnd.getTime() - w.dateStart.getTime())}): likely forgot to badge`;
+            return `employee entered at ${w.dateStart.toLocaleString()}, worked until ${w.dateEnd.toLocaleString()} (for ${formatHms(w.dateEnd.getTime() - w.dateStart.getTime())}): likely forgot to badge exit`;
     }
 }
 export function parseWorkerChecks(rows) {
@@ -25,11 +25,11 @@ export function parseWorkerChecks(rows) {
 export function getResults(workerChecks) {
     const result = new ObjectMap(JSON.stringify, JSON.parse);
     for (const [emp, checks] of workerChecks.entries()) {
-        result.set(emp, getWorkTime(emp, checks));
+        result.set(emp, getWorkTime(checks));
     }
     return result;
 }
-export function getWorkTime(emp, checks) {
+function getWorkTime(checks) {
     function dateOnlyKtop(date) {
         return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
     }
@@ -37,42 +37,39 @@ export function getWorkTime(emp, checks) {
         const [y, m, d] = date.split('-', 3);
         return new Date(+y, +m, +d);
     }
-    const workTimes = new DefaultObjectMap(() => ({ workedFor: 0, warnings: [] }), dateOnlyKtop, dateOnlyPtok);
+    const workTimes = new DefaultObjectMap(() => ({ workedFor: 0 }), dateOnlyKtop, dateOnlyPtok);
     let working = false;
     let lastClockIn = null;
     for (let i = 0; i < checks.length; ++i) {
         const d = checks[i];
         if (working) {
-            let dayDiff = dateDayDiff(d, lastClockIn);
-            if (dayDiff) {
-                workTimes.get(lastClockIn).workedFor += dateTimeUntil(lastClockIn, 23, 59, 0);
-                while (dayDiff > 1) {
-                    chday(lastClockIn, 1);
-                    workTimes.get(lastClockIn).workedFor += timePerDay - timePerMinute;
-                    dayDiff--;
+            const workTime = d.getTime() - lastClockIn.getTime();
+            if (workTime >= minWorkTime) {
+                if (workTime <= maxWorkTime) {
+                    let dayDiff = dateDayDiff(d, lastClockIn);
+                    if (dayDiff) {
+                        workTimes.get(lastClockIn).workedFor += dateTimeUntil(lastClockIn, 23, 59, 0);
+                        while (dayDiff-- > 1) {
+                            chday(lastClockIn, 1);
+                            workTimes.get(lastClockIn).workedFor += timePerDay - timePerMinute;
+                        }
+                        lastClockIn = new Date(d);
+                        lastClockIn.setHours(0, 0, 0);
+                    }
+                    workTimes.get(d).workedFor += d.getTime() - lastClockIn.getTime();
                 }
-                lastClockIn = new Date(d);
-                lastClockIn.setHours(0, 0, 0);
-                working = true;
+                else {
+                    const wt = workTimes.get(d);
+                    wt.workedFor += maxWorkTime;
+                    wt.warning = {
+                        kind: WarningKind.ForgotToBadge,
+                        dateStart: checks[i - 1],
+                        dateEnd: d,
+                    };
+                }
             }
-            workTimes.get(d).workedFor += d.getTime() - lastClockIn.getTime();
         }
         else {
-            if (i + 1 < checks.length) {
-                const dnext = checks[i + 1];
-                const diff = dnext.getTime() - d.getTime();
-                if (diff < minWorkTime) {
-                    continue;
-                }
-                else if (diff > maxWorkTime) {
-                    workTimes.get(dnext).warnings.push({
-                        kind: WarningKind.ForgotToBadge,
-                        dateStart: d,
-                        dateEnd: dnext,
-                    });
-                    continue;
-                }
-            }
             lastClockIn = d;
         }
         working = !working;

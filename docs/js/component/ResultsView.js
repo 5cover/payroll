@@ -11,6 +11,7 @@ const empProperties = [
 export default class ResultsView {
     #tableResults;
     #tableWarnings;
+    #resultsCount = 0;
     constructor(resultTable, warningsTable) {
         this.#tableResults = resultTable;
         this.#tableWarnings = warningsTable;
@@ -23,19 +24,17 @@ export default class ResultsView {
         return this.#tableResults.rows.length == 0;
     }
     addResults(result) {
-        let iWorker = 0;
+        let iWorker = this.#resultsCount++;
         for (const [emp, workTimes] of result.entries()) {
             let totalWorkTime = 0;
             let iWorkTime = 0;
             for (const [date, workTime] of workTimes.entries()) {
                 totalWorkTime += workTime.workedFor;
                 const row = this.#addResultRow(workTimes.size, iWorker, iWorkTime++, emp, date, workTime.workedFor);
-                if (workTime.warnings.length > 0) {
-                    const messages = workTime.warnings.map(getWarningMessage);
-                    this.#markResultRowWarning(row, messages);
-                    for (const msg of messages) {
-                        this.#addWarning(row.id, msg);
-                    }
+                if (workTime.warning !== undefined) {
+                    const msg = getWarningMessage(workTime.warning);
+                    this.#markResultRowWarning(row, msg);
+                    this.#addWarning(row.id, msg);
                 }
             }
             if (iWorkTime < empProperties.length) {
@@ -95,11 +94,11 @@ export default class ResultsView {
         row.insertCell().textContent = formatHms(workedFor);
         return row;
     }
-    #markResultRowWarning(row, messages) {
+    #markResultRowWarning(row, msg) {
         for (let i = row.cells.length - 1; i > row.cells.length - columnCount + headerColumnCount; --i) {
             const c = row.cells.item(i);
             c.className = 'bg-warning';
-            c.title = messages.join('\n');
+            c.title = msg;
         }
     }
     #addWarning(rowId, message) {

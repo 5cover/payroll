@@ -13,7 +13,11 @@ export default class Warning {
         el.appendChild(document.createElement('span')).className = 'slider';
         const checkbox = el.appendChild(document.createElement('input'));
         checkbox.type = 'checkbox';
-        checkbox.addEventListener('input', () => checkbox.checked ? this.#onAllow() : this.#onDisallow());
+        checkbox.addEventListener('input', () => {
+            // notify other checkboxes
+            if (checkbox.checked) this.#onAllow();
+            else this.#onDisallow();
+        });
         return el;
     }
 

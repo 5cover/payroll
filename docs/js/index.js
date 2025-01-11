@@ -1,10 +1,12 @@
-import { requireElementById, parseExcel, parseCsv } from './util.js';
-import { getResults, parseWorkerChecks, } from './domain.js';
+import { requireElementById, parseExcel, parseCsv, formatHms } from './util.js';
+import { getResults, parseWorkerChecks, minWorkTime, maxWorkTime } from './domain.js';
 import ResultsView from './component/ResultsView.js';
 const inputFile = requireElementById('input-file');
 const pInputError = requireElementById('p-input-error');
 const buttonClear = requireElementById('button-clear');
 const resultTable = new ResultsView(requireElementById('table-results'), requireElementById('table-warnings'));
+requireElementById('span-min-work-time').textContent = formatHms(minWorkTime);
+requireElementById('span-max-work-time').textContent = formatHms(maxWorkTime);
 buttonClear.addEventListener('click', () => {
     buttonClear.disabled = true;
     resultTable.clear();
