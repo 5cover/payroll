@@ -1,3 +1,6 @@
+@use 'util';
+@use 'const';
+
 :root {
     font-family: system-ui;
     font-size: 1.125em;
@@ -14,12 +17,46 @@ header ul {
 }
 
 .bg-warning {
-    background-color: rgba(255, 166, 0, 0.5);
+    background-color: const.$color-accent;
 }
 
 .switch-warning-actions {
+    display: flex;
+    @include util.basic-border(1px);
+
     input {
-        display: none;
+        @include util.absolute-fill;
+        opacity: 0;
+    }
+
+    label {
+        position: relative;
+        padding: .25em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:last-of-type {
+            border-top-right-radius: inherit;
+            border-bottom-right-radius: inherit;
+        }
+
+        &:first-of-type {
+            border-top-left-radius: inherit;
+            border-bottom-left-radius: inherit;
+        }
+
+        &:has(input:checked) {
+            background-color: const.$color-accent;
+        }
+
+        + label {
+            @include util.basic-border(0 0 0 1px);
+        }
+
+        input {
+            cursor: pointer;
+        }
     }
 }
 

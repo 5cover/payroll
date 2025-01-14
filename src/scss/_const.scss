@@ -1,0 +1,5 @@
+@use "sass:selector";
+
+$color-accent: rgba(255, 166, 0, 0.5);
+$color-border: #ddd;
+$hover: selector.parse(":is(:hover, :focus-within, :focus)");

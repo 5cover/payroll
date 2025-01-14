@@ -1,0 +1,25 @@
+@use "const";
+
+/* Absolue fill
+ *
+ * Position absolutely and fill all available space.
+ */
+ @mixin absolute-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* Basic border
+ *
+ * A basic border around the element.
+ *
+ * $width: border-width value -> border width
+ */
+ @mixin basic-border($width) {
+    border-width: $width;
+    border-style: solid;
+    border-color: const.$color-border;
+}

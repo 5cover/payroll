@@ -6,6 +6,6 @@ export default class RowId {
         this.iShift = iShift;
     }
     toString() {
-        return `${this.iWorker}.${this.iShift}`
+        return `${this.iWorker + 1}.${this.iShift + 1}`
     }
 }

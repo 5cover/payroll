@@ -1,29 +1,33 @@
-import RowId from "./RowId.js";
-import { acce } from "./util.js";
+import { Warning } from "../domain.js";
+import { DefaultPrimitiveMap } from "../Map.js";
+import RowId from "../RowId.js";
+import { acce } from "../util.js";
 
 const actions = new Map<string, {
     title: string,
     src: string,
     alt: string,
-    radios: HTMLInputElement[],
 }>();
-actions.set('allow', { title: 'Allow', src: 'img/check.svg', alt: 'Check', radios: [] });
-actions.set('cap', { title: 'Cap at max time', src: 'img/indeterminate.svg', alt: 'Indeterminate', radios: [] });
-actions.set('forbid', { title: 'Forbid', src: 'img/cross.svg', alt: 'Cross', radios: [] });
+actions.set('allow', { title: 'Allow', src: 'img/check.svg', alt: 'Check' });
+actions.set('cap', { title: 'Cap at max time', src: 'img/indeterminate.svg', alt: 'Indeterminate' });
+actions.set('forbid', { title: 'Forbid', src: 'img/cross.svg', alt: 'Cross' });
+const defaultActionId = 'cap';
 
-export default class Warning {
+export default class WarningView {
     readonly rowId: RowId;
-    readonly duration: number;
+    readonly warning: Warning;
+    readonly #radios = new DefaultPrimitiveMap<string, HTMLInputElement[]>(() => []);
 
-    constructor(rowId: RowId, duration: number) {
+    constructor(rowId: RowId, warning: Warning) {
         this.rowId = rowId;
-        this.duration = duration;
+        this.warning = warning;
     }
 
     createSwitchElement(): HTMLElement {
         const div = document.createElement('div');
         div.className = 'switch-warning-actions';
         for (const [actid, act] of actions) {
+
             const label = acce(div, 'label');
             label.title = act.title;
             label.htmlFor = this.rowId.toString() + actid;
@@ -32,16 +36,16 @@ export default class Warning {
             img.src = act.src;
 
             const rb = acce(label, 'input');
-            act.radios.push(rb);
+            this.#radios.get(actid).push(rb);
             rb.type = 'radio';
             rb.id = label.htmlFor;
             rb.name = this.rowId.toString();
             rb.value = actid;
+            if (actid === defaultActionId) rb.defaultChecked = true;
             rb.addEventListener('input', () => {
-                if (rb.checked) this.#onAllow();
-                else this.#onDisallow();
-
-                for (const other_rb of act.radios) {
+                if (!rb.checked) return;
+                this.#on(actid);
+                for (const other_rb of this.#radios.get(actid)) {
                     other_rb.checked = rb.checked;
                 }
             });
@@ -50,13 +54,10 @@ export default class Warning {
         return div;
     }
 
-    #onAllow() {
+    #on(actid: string) {
         //let d = this.duration;
         // identify the row
         // change the work time
-    }
-
-    #onDisallow() {
-        //
+        void (actid);
     }
 }

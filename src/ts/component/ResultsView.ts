@@ -1,6 +1,8 @@
 import { Employee, getWarningMessage, Shift } from "../domain.js";
 import { DefaultMap } from "../Map.js";
+import RowId from "../RowId.js";
 import { formatHms, insertHeaderCell } from "../util.js";
+import WarningView from "./WarningView.js";
 
 const columnCount = 5;
 const headerColumnCount = 2;
@@ -34,30 +36,38 @@ export default class ResultsView {
     }
 
     addResults(result: Map<Employee, DefaultMap<Date, Shift>>) {
-        let iWorker = this.#resultsCount++;
+        const rowId = new RowId(this.#resultsCount++, 0);
 
         for (const [emp, shifts] of result.entries()) {
             let totalWorkTime = 0;
-            let iShift = 0;
+            rowId.iShift = 0;
             for (const [date, shift] of shifts.entries()) {
                 totalWorkTime += shift.workTime;
-                const row = this.#addResultRow(shifts.size, iWorker, iShift++, emp, date, shift.workTime);
+                const row = this.#addResultRow(shifts.size, rowId, emp, date, shift.workTime);
 
                 if (shift.warnings.length > 0) {
                     const messages = shift.warnings.map(getWarningMessage);
                     this.#markResultRowWarning(row, messages);
-                    this.#addWarning(row.id, messages);
+                    this.#addWarning(rowId, messages);
+
+                    for (const w of shift.warnings) {
+                        const view = new WarningView(rowId, w);
+                        row.insertCell().appendChild(view.createSwitchElement());
+                    }
                 }
+
+                rowId.iShift++;
             }
 
-            if (iShift < empProperties.length) {
-                const hr = this.#addKeyPaddingRow(iShift, emp);
+            if (rowId.iShift < empProperties.length) {
+                const hr = this.#addKeyPaddingRow(rowId, emp);
                 const padc = hr.insertCell();
-                padc.rowSpan = empProperties.length - iShift++;
+                padc.rowSpan = empProperties.length - rowId.iShift++;
                 padc.colSpan = columnCount - hr.cells.length + 1;
             }
-            while (iShift < empProperties.length) {
-                this.#addKeyPaddingRow(iShift++, emp);
+            while (rowId.iShift < empProperties.length) {
+                this.#addKeyPaddingRow(rowId, emp);
+                rowId.iShift++;
             }
 
             const totalRow = this.#tableResults.insertRow();
@@ -69,13 +79,13 @@ export default class ResultsView {
             // margin row
             this.#tableResults.insertRow().insertCell().colSpan = columnCount;
 
-            iWorker++;
+            rowId.iWorker++;
         }
     }
 
-    #addKeyPaddingRow(iShift: number, emp: Employee) {
+    #addKeyPaddingRow(rowId: RowId, emp: Employee) {
         const hr = this.#tableResults.insertRow();
-        this.#fillHeaderRow(hr, iShift, emp);
+        this.#fillHeaderRow(hr, rowId, emp);
         return hr;
     }
 
@@ -99,16 +109,16 @@ export default class ResultsView {
         }
     }
 
-    #addResultRow(size: number, iWorker: number, iShift: number, emp: Employee, date: Date, workTime: number) {
+    #addResultRow(size: number, rowId: RowId, emp: Employee, date: Date, workTime: number) {
         const row = this.#tableResults.insertRow();
-        if (iShift < empProperties.length) {
-            this.#fillHeaderRow(row, iShift, emp);
-        } else if (iShift == empProperties.length) {
+        if (rowId.iShift < empProperties.length) {
+            this.#fillHeaderRow(row, rowId, emp);
+        } else if (rowId.iShift == empProperties.length) {
             const padc = row.insertCell();
             padc.colSpan = headerColumnCount;
             padc.rowSpan = size - empProperties.length;
         }
-        row.insertCell().textContent = row.id = this.#rowId(iWorker, iShift);
+        row.insertCell().textContent = row.id = rowId.toString();
         row.insertCell().textContent = date.toLocaleDateString();
         row.insertCell().textContent = formatHms(workTime);
         return row;
@@ -122,15 +132,15 @@ export default class ResultsView {
         }
     }
 
-    #addWarning(rowId: string, messages: string[]) {
+    #addWarning(rowId: RowId, messages: string[]) {
         const row = this.#tableWarnings.insertRow();
         row.insertCell();//.innerHTML = `<button type="button">Allow</button>`; // todo
-        row.insertCell().innerHTML = `<a href="#${rowId}">${rowId}</a>`;
+        row.insertCell().innerHTML = `<a href="#${rowId.toString()}">${rowId.toString()}</a>`;
         row.insertCell().innerHTML = messages.join('<br>');
     }
 
-    #fillHeaderRow(row: HTMLTableRowElement, iShift: number, emp: Employee) {
-        const [prop, name] = empProperties[iShift];
+    #fillHeaderRow(row: HTMLTableRowElement, rowId: RowId, emp: Employee) {
+        const [prop, name] = empProperties[rowId.iShift];
         insertHeaderCell(row).textContent = name;
         const kc = row.insertCell();
         if (prop === 'idNumber') {
@@ -139,9 +149,4 @@ export default class ResultsView {
             kc.textContent = emp[prop];
         }
     }
-
-    #rowId(iWorker: number, iShift: number) {
-        return `${iWorker + 1}.${iShift + 1}`;
-    }
-
 }
