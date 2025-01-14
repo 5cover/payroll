@@ -1,5 +1,5 @@
 //import { DefaultObjectMap } from "../Map";
 
-export default class EmployeeWorkTimes {
-    //readonly workTimes: DefaultObjectMap<WorkTIm[];
+export default class EmployeeShifts {
+    //readonly workTimes: DefaultObjectMap<Shift>[];
 }

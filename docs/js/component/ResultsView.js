@@ -25,26 +25,26 @@ export default class ResultsView {
     }
     addResults(result) {
         let iWorker = this.#resultsCount++;
-        for (const [emp, workTimes] of result.entries()) {
+        for (const [emp, shifts] of result.entries()) {
             let totalWorkTime = 0;
-            let iWorkTime = 0;
-            for (const [date, workTime] of workTimes.entries()) {
-                totalWorkTime += workTime.workedFor;
-                const row = this.#addResultRow(workTimes.size, iWorker, iWorkTime++, emp, date, workTime.workedFor);
-                if (workTime.warning !== undefined) {
-                    const msg = getWarningMessage(workTime.warning);
+            let iShift = 0;
+            for (const [date, shift] of shifts.entries()) {
+                totalWorkTime += shift.workTime;
+                const row = this.#addResultRow(shifts.size, iWorker, iShift++, emp, date, shift.workTime);
+                if (shift.warning !== undefined) {
+                    const msg = getWarningMessage(shift.warning);
                     this.#markResultRowWarning(row, msg);
                     this.#addWarning(row.id, msg);
                 }
             }
-            if (iWorkTime < empProperties.length) {
-                const hr = this.#addKeyPaddingRow(iWorkTime, emp);
+            if (iShift < empProperties.length) {
+                const hr = this.#addKeyPaddingRow(iShift, emp);
                 const padc = hr.insertCell();
-                padc.rowSpan = empProperties.length - iWorkTime++;
+                padc.rowSpan = empProperties.length - iShift++;
                 padc.colSpan = columnCount - hr.cells.length + 1;
             }
-            while (iWorkTime < empProperties.length) {
-                this.#addKeyPaddingRow(iWorkTime++, emp);
+            while (iShift < empProperties.length) {
+                this.#addKeyPaddingRow(iShift++, emp);
             }
             const totalRow = this.#tableResults.insertRow();
             const totalHeaderCell = insertHeaderCell(totalRow);
@@ -55,13 +55,13 @@ export default class ResultsView {
             iWorker++;
         }
     }
-    #addKeyPaddingRow(iWorkTime, emp) {
+    #addKeyPaddingRow(iShift, emp) {
         const hr = this.#tableResults.insertRow();
-        this.#fillHeaderRow(hr, iWorkTime, emp);
+        this.#fillHeaderRow(hr, iShift, emp);
         return hr;
     }
     addHeaders() {
-        this.#tableResults.createCaption().textContent = 'Work times';
+        this.#tableResults.createCaption().textContent = 'Shifts';
         {
             const row = this.#tableResults.insertRow(0);
             const thKey = insertHeaderCell(row);
@@ -79,19 +79,19 @@ export default class ResultsView {
             insertHeaderCell(row).textContent = 'Message';
         }
     }
-    #addResultRow(size, iWorker, iWorkTime, emp, date, workedFor) {
+    #addResultRow(size, iWorker, iShift, emp, date, workTime) {
         const row = this.#tableResults.insertRow();
-        if (iWorkTime < empProperties.length) {
-            this.#fillHeaderRow(row, iWorkTime, emp);
+        if (iShift < empProperties.length) {
+            this.#fillHeaderRow(row, iShift, emp);
         }
-        else if (iWorkTime == empProperties.length) {
+        else if (iShift == empProperties.length) {
             const padc = row.insertCell();
             padc.colSpan = headerColumnCount;
             padc.rowSpan = size - empProperties.length;
         }
-        row.insertCell().textContent = row.id = this.#rowId(iWorker, iWorkTime);
+        row.insertCell().textContent = row.id = this.#rowId(iWorker, iShift);
         row.insertCell().textContent = date.toLocaleDateString();
-        row.insertCell().textContent = formatHms(workedFor);
+        row.insertCell().textContent = formatHms(workTime);
         return row;
     }
     #markResultRowWarning(row, msg) {
@@ -107,8 +107,8 @@ export default class ResultsView {
         row.insertCell().innerHTML = `<a href="#${rowId}">${rowId}</a>`;
         row.insertCell().textContent = message;
     }
-    #fillHeaderRow(row, iWorkTime, emp) {
-        const [prop, name] = empProperties[iWorkTime];
+    #fillHeaderRow(row, iShift, emp) {
+        const [prop, name] = empProperties[iShift];
         insertHeaderCell(row).textContent = name;
         const kc = row.insertCell();
         if (prop === 'idNumber') {
@@ -118,7 +118,7 @@ export default class ResultsView {
             kc.textContent = emp[prop];
         }
     }
-    #rowId(iWorker, iWorkTime) {
-        return `${iWorker + 1}.${iWorkTime + 1}`;
+    #rowId(iWorker, iShift) {
+        return `${iWorker + 1}.${iShift + 1}`;
     }
 }

@@ -21,8 +21,8 @@ export interface Warning {
     dateStart: Date;
 }
 
-export interface WorkTime {
-    workedFor: number;
+export interface Shift {
+    workTime: number;
     warning?: Warning;
 }
 
@@ -44,9 +44,9 @@ export function parseWorkerChecks(rows: string[][]) {
 }
 
 export function getResults(workerChecks: Map<Employee, Date[]>) {
-    const result = new ObjectMap<Employee, DefaultMap<Date, WorkTime>, string>(JSON.stringify, JSON.parse);
+    const result = new ObjectMap<Employee, DefaultMap<Date, Shift>, string>(JSON.stringify, JSON.parse);
     for (const [emp, checks] of workerChecks.entries()) {
-        result.set(emp, getWorkTime(/* emp,  */checks));
+        result.set(emp, getShifts(/* emp,  */checks));
     }
     return result;
 }
@@ -54,7 +54,7 @@ export function getResults(workerChecks: Map<Employee, Date[]>) {
 /**
  * @return A 2-uple of the work time per date only, and the warnings per date only.
  */
-function getWorkTime(/* emp: Employee,  */checks: Date[]) {
+function getShifts(/* emp: Employee,  */checks: Date[]) {
     function dateOnlyKtop(date: Date) {
         return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
     }
@@ -63,7 +63,7 @@ function getWorkTime(/* emp: Employee,  */checks: Date[]) {
         return new Date(+y, +m, +d);
     }
 
-    const workTimes = new DefaultObjectMap<Date, WorkTime, string>(() => ({ workedFor: 0 }), dateOnlyKtop, dateOnlyPtok);
+    const shifts = new DefaultObjectMap<Date, Shift, string>(() => ({ workTime: 0 }), dateOnlyKtop, dateOnlyPtok);
 
     let working = false;
     let lastClockIn: Date = null!;
@@ -77,12 +77,12 @@ function getWorkTime(/* emp: Employee,  */checks: Date[]) {
                     let dayDiff = dateDayDiff(d, lastClockIn);
                     if (dayDiff) {
                         // make previous work until 23:59
-                        workTimes.get(lastClockIn).workedFor += dateTimeUntil(lastClockIn, 23, 59, 0);
+                        shifts.get(lastClockIn).workTime += dateTimeUntil(lastClockIn, 23, 59, 0);
 
                         // account for full 24hours of work
                         while (dayDiff-- > 1) {
                             chday(lastClockIn, 1);
-                            workTimes.get(lastClockIn).workedFor += timePerDay - timePerMinute; // work full days 23:59
+                            shifts.get(lastClockIn).workTime += timePerDay - timePerMinute; // work full days 23:59
                         }
 
                         // make next work since midnight
@@ -90,10 +90,10 @@ function getWorkTime(/* emp: Employee,  */checks: Date[]) {
                         lastClockIn.setHours(0, 0, 0);
                     }
                     // lastClockIn may have changed so we need to recompuute the work time
-                    workTimes.get(d).workedFor += d.getTime() - lastClockIn.getTime();
+                    shifts.get(d).workTime += d.getTime() - lastClockIn.getTime();
                 } else {
-                    const wt = workTimes.get(d);
-                    wt.workedFor += maxWorkTime;
+                    const wt = shifts.get(d);
+                    wt.workTime += maxWorkTime;
                     wt.warning = {
                         kind: WarningKind.ForgotToBadge,
                         dateStart: checks[i - 1],
@@ -107,7 +107,7 @@ function getWorkTime(/* emp: Employee,  */checks: Date[]) {
         working = !working;
     }
 
-    return workTimes;
+    return shifts;
 }
 
 function parseDateTime(input: string) {

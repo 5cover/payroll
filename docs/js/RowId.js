@@ -1,11 +1,11 @@
 export default class RowId {
     iWorker;
-    iWorkTime;
-    constructor(iWorker, iWorkTime) {
+    iShift;
+    constructor(iWorker, iShift) {
         this.iWorker = iWorker;
-        this.iWorkTime = iWorkTime;
+        this.iShift = iShift;
     }
     toString() {
-        return `${this.iWorker}.${this.iWorkTime}`;
+        return `${this.iWorker}.${this.iShift}`;
     }
 }

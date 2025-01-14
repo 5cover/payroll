@@ -25,11 +25,11 @@ export function parseWorkerChecks(rows) {
 export function getResults(workerChecks) {
     const result = new ObjectMap(JSON.stringify, JSON.parse);
     for (const [emp, checks] of workerChecks.entries()) {
-        result.set(emp, getWorkTime(checks));
+        result.set(emp, getShifts(checks));
     }
     return result;
 }
-function getWorkTime(checks) {
+function getShifts(checks) {
     function dateOnlyKtop(date) {
         return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
     }
@@ -37,7 +37,7 @@ function getWorkTime(checks) {
         const [y, m, d] = date.split('-', 3);
         return new Date(+y, +m, +d);
     }
-    const workTimes = new DefaultObjectMap(() => ({ workedFor: 0 }), dateOnlyKtop, dateOnlyPtok);
+    const shifts = new DefaultObjectMap(() => ({ workTime: 0 }), dateOnlyKtop, dateOnlyPtok);
     let working = false;
     let lastClockIn = null;
     for (let i = 0; i < checks.length; ++i) {
@@ -48,19 +48,19 @@ function getWorkTime(checks) {
                 if (workTime <= maxWorkTime) {
                     let dayDiff = dateDayDiff(d, lastClockIn);
                     if (dayDiff) {
-                        workTimes.get(lastClockIn).workedFor += dateTimeUntil(lastClockIn, 23, 59, 0);
+                        shifts.get(lastClockIn).workTime += dateTimeUntil(lastClockIn, 23, 59, 0);
                         while (dayDiff-- > 1) {
                             chday(lastClockIn, 1);
-                            workTimes.get(lastClockIn).workedFor += timePerDay - timePerMinute;
+                            shifts.get(lastClockIn).workTime += timePerDay - timePerMinute;
                         }
                         lastClockIn = new Date(d);
                         lastClockIn.setHours(0, 0, 0);
                     }
-                    workTimes.get(d).workedFor += d.getTime() - lastClockIn.getTime();
+                    shifts.get(d).workTime += d.getTime() - lastClockIn.getTime();
                 }
                 else {
-                    const wt = workTimes.get(d);
-                    wt.workedFor += maxWorkTime;
+                    const wt = shifts.get(d);
+                    wt.workTime += maxWorkTime;
                     wt.warning = {
                         kind: WarningKind.ForgotToBadge,
                         dateStart: checks[i - 1],
@@ -74,7 +74,7 @@ function getWorkTime(checks) {
         }
         working = !working;
     }
-    return workTimes;
+    return shifts;
 }
 function parseDateTime(input) {
     const pattern = /^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})$/;

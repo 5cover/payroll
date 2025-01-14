@@ -1,2 +1,2 @@
-export default class EmployeeWorkTimes {
+export default class EmployeeShifts {
 }
