@@ -16,8 +16,11 @@ export function notnull(arg, msg) {
     }
     return arg;
 }
+export function acce(parent, childTagName) {
+    return parent.appendChild(document.createElement(childTagName));
+}
 export function insertHeaderCell(row) {
-    return row.appendChild(document.createElement('th'));
+    return acce(row, 'th');
 }
 export function chday(date, delta) {
     date.setDate(date.getDate() + delta);
@@ -26,16 +29,13 @@ export function formatHms(time) {
     const h = time / timePerHour, m = time % timePerHour / timePerMinute, s = time % timePerMinute / timePerSecond, f = (n) => Math.trunc(n).toString().padStart(2, '0');
     return `${f(h)}:${f(m)}:${f(s)}`;
 }
-export function dateDayDiff(d1, d2) {
-    return (new Date(d1).setHours(0, 0, 0) - new Date(d2).setHours(0, 0, 0)) / timePerDay;
-}
-export function dateTimeUntil(date, h, m, s) {
-    return timePerHour * (h - date.getHours())
-        + timePerMinute * (m - date.getMinutes())
-        + timePerSecond * (s - date.getSeconds());
-}
 export function dateOnly(date) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+export function hourOfTheDay(date) {
+    return timePerHour * date.getHours()
+        + timePerMinute * date.getMinutes()
+        + timePerSecond * date.getSeconds();
 }
 export function parseCsv(str) {
     const arr = [];

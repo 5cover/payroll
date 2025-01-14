@@ -1,4 +1,4 @@
-import * as XSLX from "./lib/xlsx.js"
+import * as XSLX from "./lib/xlsx.js";
 
 export const timePerDay = 86400_000;
 export const timePerHour = 3600_000;
@@ -20,8 +20,12 @@ export function notnull<T>(arg: T | null, msg: string) {
     return arg;
 }
 
+export function acce<K extends keyof HTMLElementTagNameMap>(parent: HTMLElement, childTagName: K) {
+    return parent.appendChild(document.createElement(childTagName));
+}
+
 export function insertHeaderCell(row: HTMLTableRowElement) {
-    return row.appendChild(document.createElement('th'));
+    return acce(row, 'th');
 }
 
 export function chday(date: Date, delta: number) {
@@ -34,19 +38,14 @@ export function formatHms(time: number) {
     return `${f(h)}:${f(m)}:${f(s)}`;
 }
 
-
-export function dateDayDiff(d1: Date, d2: Date) {
-    return (new Date(d1).setHours(0, 0, 0) - new Date(d2).setHours(0, 0, 0)) / timePerDay;
-}
-
-export function dateTimeUntil(date: Date, h: number, m: number, s: number) {
-    return timePerHour * (h - date.getHours())
-        + timePerMinute * (m - date.getMinutes())
-        + timePerSecond * (s - date.getSeconds());
-}
-
 export function dateOnly(date: Date) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+export function hourOfTheDay(date: Date) {
+    return timePerHour * date.getHours()
+        + timePerMinute * date.getMinutes()
+        + timePerSecond * date.getSeconds();
 }
 
 export function parseCsv(str: string) {

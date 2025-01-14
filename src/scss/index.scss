@@ -42,3 +42,17 @@ tr {
         }
     }
 }
+
+#list-warning-actions {
+    li:nth-child(1) {
+        list-style-image: url(../img/cross.svg);
+    }
+
+    li:nth-child(2) {
+        list-style-image: url(../img/indeterminate.svg);
+    }
+
+    li:nth-child(3) {
+        list-style-image: url(../img/check.svg);
+    }
+}

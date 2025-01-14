@@ -17,57 +17,58 @@ header ul {
     background-color: rgba(255, 166, 0, 0.5);
 }
 
-/* Toogle switch */
-/* Container for the toggle */
-.toggle-switch {
-    $width: 3.125em;
-    $height: 1.5em;
-    $slider-margin: .125em;
-    $duration: .3s;
-    position: relative;
-    display: inline-block;
-    width: $width;
-    height: $height;
-
-    /* Hide default checkbox */
+.switch-warning-actions {
     input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-
-    /* The track */
-    .slider {
-        position: absolute;
-        cursor: pointer;
-        background-color: #ccc;
-        border-radius: $height;
-        width: 100%;
-        height: 100%;
-        transition: background-color 0.3s;
-
-        /* The circular slider */
-        &::before {
-            content: "";
-            position: absolute;
-            height: $height - $slider-margin * 2;
-            width: $height - $slider-margin * 2;
-            left: $slider-margin;
-            top: $slider-margin;
-            background-color: white;
-            border-radius: 50%;
-            transition: transform $duration;
-        }
-    }
-
-    /* Toggled state */
-    input:checked {
-        + .slider {
-            background-color: #4caf50;
-
-            &::before {
-                transform: translateX($width - $height);
-            }
-        }
+        display: none;
     }
 }
+
+/* Toogle switch */
+/* Container for the toggle */
+// .toggle-switch {
+//     $width: 3.125em;
+//     $height: 1.5em;
+//     $slider-margin: .125em;
+//     $duration: .3s;
+//     position: relative;
+//     display: inline-block;
+//     width: $width;
+//     height: $height;
+//     /* Hide default checkbox */
+//     input {
+//         opacity: 0;
+//         width: 0;
+//         height: 0;
+//     }
+//     /* The track */
+//     .slider {
+//         position: absolute;
+//         cursor: pointer;
+//         background-color: #ccc;
+//         border-radius: $height;
+//         width: 100%;
+//         height: 100%;
+//         transition: background-color 0.3s;
+//         /* The circular slider */
+//         &::before {
+//             content: "";
+//             position: absolute;
+//             height: $height - $slider-margin * 2;
+//             width: $height - $slider-margin * 2;
+//             left: $slider-margin;
+//             top: $slider-margin;
+//             background-color: white;
+//             border-radius: 50%;
+//             transition: transform $duration;
+//         }
+//     }
+//     /* Toggled state */
+//     input:checked {
+//         + .slider {
+//             background-color: #4caf50;
+//             &::before {
+//                 transform: translateX($width - $height);
+//             }
+//         }
+//     }
+// }

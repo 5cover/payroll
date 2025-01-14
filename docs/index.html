@@ -21,9 +21,15 @@
         <input type="file" id="input-file" accept=".xls,.xlsx,.csv,text/csv" multiple>
     </p>
     <p id="p-input-error" class="error"></p>
-    <p>Min work time: <span id="span-min-work-time"></span> (shorter shifts are ignored)</p>
-    <p>Max work time: <span id="span-max-work-time"></span> (longer shifts are ignored)</p>
     <h2>2. Results</h2>
+    <p>Min work time: <span id="span-min-work-time"></span> (shorter shifts are ignored)</p>
+    <p>Resolving warnings:</p>
+    <ul id="list-warning-actions">
+        <li>Forbid (ignore shift)</li>
+        <li>Cap (consider max work time of <span id="span-max-work-time"></span>)</li>
+        <li>Allow (consider whole shift)</li>
+    </ul>
+    <hr>
     <p><button type="button" id="button-clear" disabled>Clear</button></p>
     <section id="section-results">
         <table id="table-results"></table>

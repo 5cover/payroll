@@ -19,6 +19,7 @@ export default class ResultsView {
     clear() {
         this.#tableResults.textContent = '';
         this.#tableWarnings.textContent = '';
+        this.#resultsCount = 0;
     }
     get isEmpty() {
         return this.#tableResults.rows.length == 0;
@@ -31,10 +32,10 @@ export default class ResultsView {
             for (const [date, shift] of shifts.entries()) {
                 totalWorkTime += shift.workTime;
                 const row = this.#addResultRow(shifts.size, iWorker, iShift++, emp, date, shift.workTime);
-                if (shift.warning !== undefined) {
-                    const msg = getWarningMessage(shift.warning);
-                    this.#markResultRowWarning(row, msg);
-                    this.#addWarning(row.id, msg);
+                if (shift.warnings.length > 0) {
+                    const messages = shift.warnings.map(getWarningMessage);
+                    this.#markResultRowWarning(row, messages);
+                    this.#addWarning(row.id, messages);
                 }
             }
             if (iShift < empProperties.length) {
@@ -94,18 +95,18 @@ export default class ResultsView {
         row.insertCell().textContent = formatHms(workTime);
         return row;
     }
-    #markResultRowWarning(row, msg) {
+    #markResultRowWarning(row, messages) {
         for (let i = row.cells.length - 1; i > row.cells.length - columnCount + headerColumnCount; --i) {
             const c = row.cells.item(i);
             c.className = 'bg-warning';
-            c.title = msg;
+            c.title = messages.join('\n');
         }
     }
-    #addWarning(rowId, message) {
+    #addWarning(rowId, messages) {
         const row = this.#tableWarnings.insertRow();
         row.insertCell();
         row.insertCell().innerHTML = `<a href="#${rowId}">${rowId}</a>`;
-        row.insertCell().textContent = message;
+        row.insertCell().innerHTML = messages.join('<br>');
     }
     #fillHeaderRow(row, iShift, emp) {
         const [prop, name] = empProperties[iShift];

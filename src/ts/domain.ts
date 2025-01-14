@@ -1,5 +1,5 @@
 import { DefaultMap, DefaultObjectMap, ObjectMap } from './Map.js';
-import { notnull, chday, dateDayDiff, dateTimeUntil, timePerDay, timePerMinute, timePerHour, formatHms } from './util.js';
+import { notnull, timePerMinute, timePerHour, formatHms, dateOnly, hourOfTheDay, chday, timePerDay } from './util.js';
 
 export const minWorkTime = 10 * timePerMinute;
 export const maxWorkTime = 10 * timePerHour;
@@ -11,26 +11,18 @@ export interface Employee {
     idNumber: [string, number],
 };
 
-export enum WarningKind {
-    ForgotToBadge,
-}
-
 export interface Warning {
-    kind: WarningKind;
-    dateEnd: Date;
-    dateStart: Date;
+    hourStart: number;
+    hourEnd: number;
 }
 
 export interface Shift {
     workTime: number;
-    warning?: Warning;
+    warnings: Warning[];
 }
 
 export function getWarningMessage(w: Warning) {
-    switch (w.kind) {
-        case WarningKind.ForgotToBadge:
-            return `employee entered at ${w.dateStart.toLocaleString()}, worked until ${w.dateEnd.toLocaleString()} (for ${formatHms(w.dateEnd.getTime() - w.dateStart.getTime())}): likely forgot to badge exit`;
-    }
+    return `employee entered at ${formatHms(w.hourStart)}, worked until ${formatHms(w.hourEnd)} (for ${formatHms(w.hourEnd - w.hourStart)}): likely forgot to badge exit`;
 }
 
 export function parseWorkerChecks(rows: string[][]) {
@@ -63,44 +55,31 @@ function getShifts(/* emp: Employee,  */checks: Date[]) {
         return new Date(+y, +m, +d);
     }
 
-    const shifts = new DefaultObjectMap<Date, Shift, string>(() => ({ workTime: 0 }), dateOnlyKtop, dateOnlyPtok);
+    const shifts = new DefaultObjectMap<Date, Shift, string>(() => ({ workTime: 0, warnings: [] }), dateOnlyKtop, dateOnlyPtok);
 
     let working = false;
     let lastClockIn: Date = null!;
-    for (let i = 0; i < checks.length; ++i) {
-        const d = checks[i];
+    for (const d of checks) {
+        //for (let i = 0; i < checks.length; ++i) {
+        //const d = checks[i];
         if (working) {
             // d is a clockout
-            const workTime = d.getTime() - lastClockIn.getTime();
-            if (workTime >= minWorkTime) {
+            // what if workTIme > 1 day?
+
+            const bd = bin_by_day(lastClockIn, d);
+            for (const [day, [hourStart, hourEnd]] of bd) {
+                const workTime = hourEnd - hourStart;
+                if (workTime <= minWorkTime) {
+                    continue;
+                }
                 if (workTime <= maxWorkTime) {
-                    let dayDiff = dateDayDiff(d, lastClockIn);
-                    if (dayDiff) {
-                        // make previous work until 23:59
-                        shifts.get(lastClockIn).workTime += dateTimeUntil(lastClockIn, 23, 59, 0);
-
-                        // account for full 24hours of work
-                        while (dayDiff-- > 1) {
-                            chday(lastClockIn, 1);
-                            shifts.get(lastClockIn).workTime += timePerDay - timePerMinute; // work full days 23:59
-                        }
-
-                        // make next work since midnight
-                        lastClockIn = new Date(d);
-                        lastClockIn.setHours(0, 0, 0);
-                    }
-                    // lastClockIn may have changed so we need to recompuute the work time
-                    shifts.get(d).workTime += d.getTime() - lastClockIn.getTime();
+                    shifts.get(day).workTime += workTime;
                 } else {
-                    const wt = shifts.get(d);
-                    wt.workTime += maxWorkTime;
-                    wt.warning = {
-                        kind: WarningKind.ForgotToBadge,
-                        dateStart: checks[i - 1],
-                        dateEnd: d,
-                    };
+                    shifts.get(day).workTime += maxWorkTime;
+                    shifts.get(day).warnings.push({ hourStart, hourEnd });
                 }
             }
+
         } else {
             lastClockIn = d;
         }
@@ -108,6 +87,33 @@ function getShifts(/* emp: Employee,  */checks: Date[]) {
     }
 
     return shifts;
+}
+
+function bin_by_day(start: Date, end: Date) {
+    const days = new ObjectMap<Date, [number, number], number>(k => k.getTime(), p => new Date(p));
+
+    const start_early = dateOnly(start);
+    const end_early = dateOnly(end);
+
+    if (start_early.getTime() === end_early.getTime()) {
+        days.set(start_early, [hourOfTheDay(start), hourOfTheDay(end)]);
+        return days;
+    }
+
+    const start_late = dateOnly(start);
+    chday(start_late, 1);
+
+    if (start !== start_late) {
+        days.set(start_early, [hourOfTheDay(start), timePerDay - timePerMinute]);
+    }
+    for (let d = start_late; d < end_early; chday(d, 1)) {
+        days.set(d, [0, timePerDay - timePerMinute]); // 23:59
+    }
+    if (end !== end_early) {
+        days.set(end_early, [0, hourOfTheDay(end)]);
+    }
+
+    return days;
 }
 
 function parseDateTime(input: string) {
