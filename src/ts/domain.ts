@@ -1,5 +1,5 @@
-import { DefaultMap, DefaultObjectMap, ObjectMap } from './Map.js';
-import { notnull, timePerMinute, timePerHour, formatHms, dateOnly, hourOfTheDay, chday, timePerDay } from './util.js';
+import { DefaultObjectMap } from './Map.js';
+import { notnull, timePerMinute, timePerHour, formatHms } from './util.js';
 
 export const minWorkTime = 10 * timePerMinute;
 export const maxWorkTime = 10 * timePerHour;
@@ -16,9 +16,26 @@ export interface Warning {
     hourEnd: number;
 }
 
-export interface Shift {
-    workTime: number;
+export class Shift {
+    #workTime: number;
     warnings: Warning[];
+
+    workTimeChanged: ((this: this, oldValue: number) => void)[] = [];
+
+    constructor(workTime: number, warnings: Warning[]) {
+        this.#workTime = workTime;
+        this.warnings = warnings;
+    }
+
+    get workTime() {
+        return this.#workTime;
+    }
+
+    set workTime(value: number) {
+        const old = this.#workTime;
+        this.#workTime = value;
+        this.workTimeChanged.forEach(f => f.call(this, old));
+    }
 }
 
 export function getWarningMessage(w: Warning) {
@@ -33,87 +50,6 @@ export function parseWorkerChecks(rows: string[][]) {
             .push(parseDateTime(dateTime));
     }
     return workingHours;
-}
-
-export function getResults(workerChecks: Map<Employee, Date[]>) {
-    const result = new ObjectMap<Employee, DefaultMap<Date, Shift>, string>(JSON.stringify, JSON.parse);
-    for (const [emp, checks] of workerChecks.entries()) {
-        result.set(emp, getShifts(/* emp,  */checks));
-    }
-    return result;
-}
-
-/**
- * @return A 2-uple of the work time per date only, and the warnings per date only.
- */
-function getShifts(/* emp: Employee,  */checks: Date[]) {
-    function dateOnlyKtop(date: Date) {
-        return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-    }
-    function dateOnlyPtok(date: string) {
-        const [y, m, d] = date.split('-', 3);
-        return new Date(+y, +m, +d);
-    }
-
-    const shifts = new DefaultObjectMap<Date, Shift, string>(() => ({ workTime: 0, warnings: [] }), dateOnlyKtop, dateOnlyPtok);
-
-    let working = false;
-    let lastClockIn: Date = null!;
-    for (const d of checks) {
-        //for (let i = 0; i < checks.length; ++i) {
-        //const d = checks[i];
-        if (working) {
-            // d is a clockout
-            // what if workTIme > 1 day?
-
-            const bd = bin_by_day(lastClockIn, d);
-            for (const [day, [hourStart, hourEnd]] of bd) {
-                const workTime = hourEnd - hourStart;
-                if (workTime <= minWorkTime) {
-                    continue;
-                }
-                if (workTime <= maxWorkTime) {
-                    shifts.get(day).workTime += workTime;
-                } else {
-                    shifts.get(day).workTime += maxWorkTime;
-                    shifts.get(day).warnings.push({ hourStart, hourEnd });
-                }
-            }
-
-        } else {
-            lastClockIn = d;
-        }
-        working = !working;
-    }
-
-    return shifts;
-}
-
-function bin_by_day(start: Date, end: Date) {
-    const days = new ObjectMap<Date, [number, number], number>(k => k.getTime(), p => new Date(p));
-
-    const start_early = dateOnly(start);
-    const end_early = dateOnly(end);
-
-    if (start_early.getTime() === end_early.getTime()) {
-        days.set(start_early, [hourOfTheDay(start), hourOfTheDay(end)]);
-        return days;
-    }
-
-    const start_late = dateOnly(start);
-    chday(start_late, 1);
-
-    if (start !== start_late) {
-        days.set(start_early, [hourOfTheDay(start), timePerDay - timePerMinute]);
-    }
-    for (let d = start_late; d < end_early; chday(d, 1)) {
-        days.set(d, [0, timePerDay - timePerMinute]); // 23:59
-    }
-    if (end !== end_early) {
-        days.set(end_early, [0, hourOfTheDay(end)]);
-    }
-
-    return days;
 }
 
 function parseDateTime(input: string) {

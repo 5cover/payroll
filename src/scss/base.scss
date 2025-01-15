@@ -7,6 +7,10 @@
     scroll-behavior: smooth;
 }
 
+* {
+    box-sizing: border-box;
+}
+
 header ul {
     list-style: none;
     padding: 0;
@@ -21,8 +25,11 @@ header ul {
 }
 
 .switch-warning-actions {
+    $border-with: 1px;
+    $size: calc(1.5625em + $border-with);
+
+    @include util.basic-border($border-with);
     display: flex;
-    @include util.basic-border(1px);
 
     input {
         @include util.absolute-fill;
@@ -35,6 +42,8 @@ header ul {
         display: flex;
         align-items: center;
         justify-content: center;
+        height: $size;
+        width: $size;
 
         &:last-of-type {
             border-top-right-radius: inherit;
@@ -50,8 +59,12 @@ header ul {
             background-color: const.$color-accent;
         }
 
+        &:has(input:is(:focus, :focus-within)) {
+            border: $border-with solid #8C5DD9;
+        }
+
         + label {
-            @include util.basic-border(0 0 0 1px);
+            @include util.basic-border(0 0 0 $border-with);
         }
 
         input {

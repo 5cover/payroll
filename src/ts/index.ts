@@ -1,12 +1,13 @@
 import { requireElementById, parseExcel, parseCsv, formatHms } from './util.js';
-import { getResults, parseWorkerChecks, minWorkTime, maxWorkTime } from './domain.js';
-import ResultsView from './component/ResultsView.js';
+import { parseWorkerChecks, minWorkTime, maxWorkTime } from './domain.js';
+import ResultView from './component/ResultView.js';
+import Result from './model/Result.js';
 
 const inputFile = requireElementById('input-file') as HTMLInputElement;
 const pInputError = requireElementById('p-input-error');
 const buttonClear = requireElementById('button-clear') as HTMLButtonElement;
 
-const resultTable = new ResultsView(
+const resultTable = new ResultView(
     requireElementById('table-results') as HTMLTableElement,
     requireElementById('table-warnings') as HTMLTableElement,
 );
@@ -27,19 +28,21 @@ inputFile.addEventListener('change', function () {
             resultTable.addHeaders();
         }
         for (const file of this.files ?? []) {
-            const results = getResults(parseWorkerChecks(await parseSpreadsheet(file)));
-            resultTable.addResults(results);
+            const result = new Result(parseWorkerChecks(await parseSpreadsheet(file)));
+            resultTable.addResult(result);
         }
     })();
 });
 async function parseSpreadsheet(file: File) {
+    const isCsv = file.type === 'text/csv';
     try {
-        return file.type === 'text/csv'
+        return isCsv
             ? parseCsv(await file.text())
             : await parseExcel(file);
-        //resultTable.addResult(parseWorkerChecks(result));
     } catch (e) {
-        pInputError.textContent = 'Failed to import the badges sheet. You can try exporting it to CSV and importing that instead. ' + String(e);
+        pInputError.textContent = 'Failed to import the badges sheet. '
+            + (isCsv ? '' : 'You can try exporting it to CSV and importing that instead. ')
+            + String(e);
         throw e;
     }
 }

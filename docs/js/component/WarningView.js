@@ -1,34 +1,45 @@
+import { maxWorkTime } from "../domain.js";
 import { DefaultPrimitiveMap } from "../Map.js";
 import { acce } from "../util.js";
+var ActionId;
+(function (ActionId) {
+    ActionId["Forbid"] = "forbid";
+    ActionId["Cap"] = "cap";
+    ActionId["Allow"] = "allow";
+})(ActionId || (ActionId = {}));
 const actions = new Map();
-actions.set('allow', { title: 'Allow', src: 'img/check.svg', alt: 'Check' });
-actions.set('cap', { title: 'Cap at max time', src: 'img/indeterminate.svg', alt: 'Indeterminate' });
-actions.set('forbid', { title: 'Forbid', src: 'img/cross.svg', alt: 'Cross' });
-const defaultActionId = 'cap';
+actions.set(ActionId.Forbid, { title: 'Forbid', src: 'img/cross.svg', alt: 'Cross' });
+actions.set(ActionId.Cap, { title: 'Cap at max time', src: 'img/indeterminate.svg', alt: 'Indeterminate' });
+actions.set(ActionId.Allow, { title: 'Allow', src: 'img/check.svg', alt: 'Check' });
 export default class WarningView {
-    rowId;
     warning;
     #radios = new DefaultPrimitiveMap(() => []);
-    constructor(rowId, warning) {
-        this.rowId = rowId;
+    #result;
+    #employee;
+    #day;
+    #state = ActionId.Cap;
+    constructor(result, employee, day, warning) {
+        this.#employee = employee;
+        this.#day = day;
         this.warning = warning;
+        this.#result = result;
     }
-    createSwitchElement() {
+    createSwitchElement(rowId) {
         const div = document.createElement('div');
         div.className = 'switch-warning-actions';
         for (const [actid, act] of actions) {
             const label = acce(div, 'label');
             label.title = act.title;
-            label.htmlFor = this.rowId.toString() + actid;
             const img = acce(label, 'img');
             img.src = act.src;
             const rb = acce(label, 'input');
-            this.#radios.get(actid).push(rb);
+            const idBase = `${rowId.toString()}.${this.#radios.get(actid).push(rb)}`;
+            label.htmlFor = idBase + actid;
             rb.type = 'radio';
             rb.id = label.htmlFor;
-            rb.name = this.rowId.toString();
+            rb.name = idBase;
             rb.value = actid;
-            if (actid === defaultActionId)
+            if (this.#state === actid)
                 rb.defaultChecked = true;
             rb.addEventListener('input', () => {
                 if (!rb.checked)
@@ -42,6 +53,34 @@ export default class WarningView {
         return div;
     }
     #on(actid) {
-        void (actid);
+        if (this.#state === actid)
+            return;
+        const shift = this.#result.employeeShifts.get(this.#employee).get(this.#day);
+        let wt = shift.workTime;
+        const realWorkTime = this.warning.hourEnd - this.warning.hourStart;
+        switch (this.#state) {
+            case ActionId.Allow:
+                wt -= realWorkTime;
+                if (actid === ActionId.Cap) {
+                    wt += maxWorkTime;
+                }
+                break;
+            case ActionId.Cap:
+                wt -= maxWorkTime;
+                if (actid === ActionId.Allow) {
+                    wt += realWorkTime;
+                }
+                break;
+            case ActionId.Forbid:
+                if (actid === ActionId.Allow) {
+                    wt += realWorkTime;
+                }
+                else {
+                    wt += maxWorkTime;
+                }
+                break;
+        }
+        shift.workTime = wt;
+        this.#state = actid;
     }
 }

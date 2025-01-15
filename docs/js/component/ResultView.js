@@ -1,6 +1,6 @@
 import { getWarningMessage } from "../domain.js";
 import RowId from "../RowId.js";
-import { formatHms, insertHeaderCell, requireElementById } from "../util.js";
+import { formatHms, insertHeaderCell } from "../util.js";
 import WarningView from "./WarningView.js";
 const columnCount = 5;
 const headerColumnCount = 2;
@@ -10,10 +10,10 @@ const empProperties = [
     ['no', 'No.'],
     ['idNumber', 'ID Number'],
 ];
-export default class ResultsView {
+export default class ResultView {
     #tableResults;
     #tableWarnings;
-    #resultsCount = 0;
+    #resultCount = 0;
     constructor(resultTable, warningsTable) {
         this.#tableResults = resultTable;
         this.#tableWarnings = warningsTable;
@@ -21,39 +21,27 @@ export default class ResultsView {
     clear() {
         this.#tableResults.textContent = '';
         this.#tableWarnings.textContent = '';
-        this.#resultsCount = 0;
+        this.#resultCount = 0;
     }
     get isEmpty() {
         return this.#tableResults.rows.length == 0;
     }
-    getWorkTime(rowId) {
-        console.log(`getWorkTime ${rowId.toString()}`);
-        debugger;
-        const row = requireElementById(rowId.toString());
-        return +row.cells.item(4).textContent;
-    }
-    setWorkTime(rowId, newWorkTime) {
-        console.log(`setWorkTime ${rowId.toString()} ${newWorkTime}`);
-        debugger;
-        const row = requireElementById(rowId.toString());
-        row.cells.item(4).textContent = newWorkTime.toString();
-    }
-    addResults(result) {
-        const rowId = new RowId(this.#resultsCount++, 0);
-        for (const [emp, shifts] of result.entries()) {
+    addResult(result) {
+        const rowId = new RowId(this.#resultCount++, 0);
+        for (const [emp, shifts] of result.employeeShifts) {
             let totalWorkTime = 0;
             rowId.iShift = 0;
-            for (const [date, shift] of shifts.entries()) {
+            for (const [day, shift] of shifts.entries()) {
                 totalWorkTime += shift.workTime;
-                const row = this.#addResultRow(shifts.size, rowId, emp, date, shift.workTime);
+                const row = this.#addResultRow(shifts.size, rowId, emp, day, shift);
                 if (shift.warnings.length > 0) {
-                    const messages = shift.warnings.map(getWarningMessage);
-                    this.#markResultRowWarning(row, messages);
-                    this.#addWarning(rowId, messages);
+                    this.#markResultRowWarning(row, shift.warnings.map(getWarningMessage));
                     for (const w of shift.warnings) {
-                        const view = new WarningView(this, new RowId(rowId.iWorker, rowId.iShift), w);
-                        row.insertCell().appendChild(view.createSwitchElement());
+                        const view = new WarningView(result, emp, day, w);
+                        row.insertCell().appendChild(view.createSwitchElement(rowId));
+                        this.#addWarning(rowId, view);
                     }
+                    shift.workTimeChanged.push(old => tdTotal.textContent = formatHms(totalWorkTime += shift.workTime - old));
                 }
                 rowId.iShift++;
             }
@@ -68,10 +56,12 @@ export default class ResultsView {
                 rowId.iShift++;
             }
             const totalRow = this.#tableResults.insertRow();
-            const totalHeaderCell = insertHeaderCell(totalRow);
-            totalHeaderCell.textContent = 'Total';
-            totalHeaderCell.colSpan = 4;
-            totalRow.insertCell().textContent = formatHms(totalWorkTime);
+            const thTotal = insertHeaderCell(totalRow);
+            thTotal.textContent = 'Total';
+            thTotal.colSpan = 4;
+            const tdTotal = totalRow.insertCell();
+            tdTotal.textContent = formatHms(totalWorkTime);
+            totalRow.appendChild(tdTotal);
             this.#tableResults.insertRow().insertCell().colSpan = columnCount;
             rowId.iWorker++;
         }
@@ -100,7 +90,7 @@ export default class ResultsView {
             insertHeaderCell(row).textContent = 'Message';
         }
     }
-    #addResultRow(size, rowId, emp, date, workTime) {
+    #addResultRow(size, rowId, emp, date, shift) {
         const row = this.#tableResults.insertRow();
         if (rowId.iShift < empProperties.length) {
             this.#fillHeaderRow(row, rowId, emp);
@@ -112,7 +102,9 @@ export default class ResultsView {
         }
         row.insertCell().textContent = row.id = rowId.toString();
         row.insertCell().textContent = date.toLocaleDateString();
-        row.insertCell().textContent = formatHms(workTime);
+        const tdWorkTime = row.insertCell();
+        tdWorkTime.textContent = formatHms(shift.workTime);
+        shift.workTimeChanged.push(() => tdWorkTime.textContent = formatHms(shift.workTime));
         return row;
     }
     #markResultRowWarning(row, messages) {
@@ -122,11 +114,11 @@ export default class ResultsView {
             c.title = messages.join('\n');
         }
     }
-    #addWarning(rowId, messages) {
+    #addWarning(rowId, view) {
         const row = this.#tableWarnings.insertRow();
-        row.insertCell();
+        row.insertCell().appendChild(view.createSwitchElement(rowId));
         row.insertCell().innerHTML = `<a href="#${rowId.toString()}">${rowId.toString()}</a>`;
-        row.insertCell().innerHTML = messages.join('<br>');
+        row.insertCell().textContent = getWarningMessage(view.warning);
     }
     #fillHeaderRow(row, rowId, emp) {
         const [prop, name] = empProperties[rowId.iShift];
