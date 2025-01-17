@@ -42,7 +42,6 @@ export default class ResultView {
     }
 
     addResult(result: Result) {
-
         const rowId = new RowId(this.#resultCount++, 0);
 
         for (const [emp, shifts] of result.employeeShifts) {

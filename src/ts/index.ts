@@ -11,7 +11,7 @@ const pInputError = requireElementById('p-input-error');
 const buttonClear = requireElementById('button-clear') as HTMLButtonElement;
 const buttonExport = requireElementById('button-export') as HTMLButtonElement;
 
-const resultTable = new ResultView(
+const resultView = new ResultView(
     requireElementById('table-results') as HTMLTableElement,
     requireElementById('table-warnings') as HTMLTableElement,
 );
@@ -20,24 +20,24 @@ requireElementById('span-min-work-time').textContent = formatHms(minWorkTime);
 requireElementById('span-max-work-time').textContent = formatHms(maxWorkTime);
 
 buttonClear.addEventListener('click', () => {
-    if (resultTable.rowCount > maxUnconfirmedClearRows && !confirm(`Are you sure? This will remove ${resultTable.rowCount} rows`))
+    if (resultView.rowCount > maxUnconfirmedClearRows && !confirm(`Are you sure? This will remove ${resultView.rowCount} rows`))
         return;
     buttonClear.disabled = buttonExport.disabled = true;
-    resultTable.clear();
+    resultView.clear();
 });
 
-buttonExport.addEventListener('click', () => writeFileXLSX(resultTable.toWorkBook(), 'result.xslx'));
+buttonExport.addEventListener('click', () => writeFileXLSX(resultView.toWorkBook(), 'result.xslx'));
 
 inputFile.addEventListener('change', function () {
     void (async () => {
         if (!this.files) return;
         buttonClear.disabled = buttonExport.disabled = false;
-        if (resultTable.rowCount === 0) {
-            resultTable.addHeaders();
+        if (resultView.rowCount === 0) {
+            resultView.addHeaders();
         }
         for (const file of this.files ?? []) {
             const result = new Result(parseWorkerChecks(await parseSpreadsheet(file)));
-            resultTable.addResult(result);
+            resultView.addResult(result);
         }
     })();
 });
