@@ -1,6 +1,6 @@
 import { requireElementById, parseExcel, parseCsv, formatHms } from './util.js';
 import { parseWorkerChecks, minWorkTime, maxWorkTime } from './domain.js';
-import ResultView from './component/ResultView.js';
+import ResultView from './view/ResultView.js';
 import Result from './model/Result.js';
 import { writeFileXLSX } from './lib/xlsx.js';
 const maxUnconfirmedClearRows = 20;
