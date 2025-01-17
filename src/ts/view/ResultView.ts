@@ -1,6 +1,6 @@
 import { Employee, getWarningMessage, Shift } from "../domain.js";
 import Result from "../model/Result.js";
-import RowId from "../RowId.js";
+import RowId from "../model/RowId.js";
 import { formatHms, insertHeaderCell } from "../util.js";
 import WarningView from "./WarningView.js";
 

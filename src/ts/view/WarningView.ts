@@ -1,6 +1,6 @@
 import { Employee, maxWorkTime, Warning } from "../domain.js";
 import { DefaultPrimitiveMap } from "../Map.js";
-import RowId from "../RowId.js";
+import RowId from "../model/RowId.js";
 import { acce } from "../util.js";
 import Result from "../model/Result.js";
 

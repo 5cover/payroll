@@ -12,8 +12,6 @@ export default class Result {
     }
 }
 
-
-
 function getShifts(/* emp: Employee,  */checks: Date[]) {
     function dateOnlyKtop(date: Date) {
         return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
