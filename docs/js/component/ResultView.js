@@ -28,10 +28,7 @@ export default class ResultView {
         return this.#tableWarnings.rows.length;
     }
     toWorkBook() {
-        return XSLX.utils.table_to_book(this.#tableResults, {
-            raw: true,
-            WTF: true,
-        });
+        return XSLX.utils.table_to_book(this.#tableResults, { raw: true });
     }
     addResult(result) {
         const rowId = new RowId(this.#resultCount++, 0);
