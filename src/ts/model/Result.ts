@@ -23,16 +23,13 @@ function getShifts(/* emp: Employee,  */checks: Date[]) {
         return new Date(+y, +m, +d);
     }
 
-    const shifts = new DefaultObjectMap<Date, Shift, string>(() => new Shift(0,[]), dateOnlyKtop, dateOnlyPtok);
+    const shifts = new DefaultObjectMap<Date, Shift, string>(() => new Shift(0, []), dateOnlyKtop, dateOnlyPtok);
 
     let working = false;
     let lastClockIn: Date = null!;
     for (const d of checks) {
-        //for (let i = 0; i < checks.length; ++i) {
-        //const d = checks[i];
         if (working) {
             // d is a clockout
-            // what if workTIme > 1 day?
 
             const bd = bin_by_day(lastClockIn, d);
             for (const [day, [hourStart, hourEnd]] of bd) {

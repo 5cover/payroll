@@ -2,22 +2,28 @@ import { requireElementById, parseExcel, parseCsv, formatHms } from './util.js';
 import { parseWorkerChecks, minWorkTime, maxWorkTime } from './domain.js';
 import ResultView from './component/ResultView.js';
 import Result from './model/Result.js';
+import { writeFileXLSX } from './lib/xlsx.js';
+const maxUnconfirmedClearRows = 20;
 const inputFile = requireElementById('input-file');
 const pInputError = requireElementById('p-input-error');
 const buttonClear = requireElementById('button-clear');
+const buttonExport = requireElementById('button-export');
 const resultTable = new ResultView(requireElementById('table-results'), requireElementById('table-warnings'));
 requireElementById('span-min-work-time').textContent = formatHms(minWorkTime);
 requireElementById('span-max-work-time').textContent = formatHms(maxWorkTime);
 buttonClear.addEventListener('click', () => {
-    buttonClear.disabled = true;
+    if (resultTable.rowCount > maxUnconfirmedClearRows && !confirm(`Are you sure? This will remove ${resultTable.rowCount} rows`))
+        return;
+    buttonClear.disabled = buttonExport.disabled = true;
     resultTable.clear();
 });
+buttonExport.addEventListener('click', () => writeFileXLSX(resultTable.toWorkBook(), 'result.xslx'));
 inputFile.addEventListener('change', function () {
     void (async () => {
         if (!this.files)
             return;
-        buttonClear.disabled = false;
-        if (resultTable.isEmpty) {
+        buttonClear.disabled = buttonExport.disabled = false;
+        if (resultTable.rowCount === 0) {
             resultTable.addHeaders();
         }
         for (const file of this.files ?? []) {

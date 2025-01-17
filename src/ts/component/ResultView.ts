@@ -4,6 +4,8 @@ import RowId from "../RowId.js";
 import { formatHms, insertHeaderCell } from "../util.js";
 import WarningView from "./WarningView.js";
 
+import * as XSLX from "../lib/xlsx.js";
+
 const columnCount = 5;
 const headerColumnCount = 2;
 
@@ -31,8 +33,12 @@ export default class ResultView {
         this.#resultCount = 0;
     }
 
-    get isEmpty() {
-        return this.#tableResults.rows.length == 0;
+    get rowCount() {
+        return this.#tableWarnings.rows.length;
+    }
+
+    toWorkBook() {
+        return XSLX.utils.table_to_book(this.#tableResults, { raw: true });
     }
 
     addResult(result: Result) {
