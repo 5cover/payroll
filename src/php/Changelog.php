@@ -14,7 +14,7 @@ final class Changelog
 
     private function __construct(array $versions)
     {
-        krsort($versions);
+        krsort($versions); // is alphabetic comparison enough?
         $this->versions = $versions;
     }
 
@@ -27,7 +27,7 @@ final class Changelog
     function __get(string $name): mixed
     {
         return match ($name) {
-            'latestVersion' => array_key_first($this->versions),  // is alphabetic comparison enough?
+            'latestVersion' => array_key_first($this->versions),
         };
     }
 }
