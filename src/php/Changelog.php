@@ -6,7 +6,6 @@
 final class Changelog
 {
     private static ?Changelog $instance;
-    private ?string $latestVersion;
     /**
      * Summary of versions
      * @var object[]
@@ -15,7 +14,7 @@ final class Changelog
 
     private function __construct(array $versions)
     {
-        rsort($versions);
+        krsort($versions);
         $this->versions = $versions;
     }
 
@@ -28,7 +27,7 @@ final class Changelog
     function __get(string $name): mixed
     {
         return match ($name) {
-            'latestVersion' => $this->latestVersion ??= max(array_keys($this->versions)),  // is alphabetic comparison enough?
+            'latestVersion' => array_key_first($this->versions),  // is alphabetic comparison enough?
         };
     }
 }
