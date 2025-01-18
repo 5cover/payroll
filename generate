@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -eu
+cd "$(dirname "${BASH_SOURCE[0]}")"
+
+php -d include_path="$PWD"/src/php src/php/generate.php
+echo -n 'tsc... '
+tsc
+echo ok
+mkdir -p docs/js/lib
+cp src/ts/lib/*.js docs/js/lib

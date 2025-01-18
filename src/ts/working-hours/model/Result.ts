@@ -1,6 +1,6 @@
 import { Employee, maxWorkTime, minWorkTime, Shift } from "../domain.js";
-import { ObjectMap, DefaultMap, DefaultObjectMap } from "../Map.js";
-import { chday, dateOnly, hourOfTheDay, timePerDay, timePerMinute } from "../util.js";
+import { ObjectMap, DefaultMap, DefaultObjectMap } from "../../Map.js";
+import { chday, dateOnly, hourOfTheDay, timePerDay, timePerMinute } from "../../util.js";
 
 export default class Result {
     readonly employeeShifts = new ObjectMap<Employee, DefaultMap<Date, Shift>, string>(JSON.stringify, JSON.parse);

@@ -1,4 +1,4 @@
-import { requireElementById } from "../util.js";
+import { requireElementById } from "../../util.js";
 import { ActionId, createSwitchWarningActionsElement } from "../warningActions.js";
 const globalPrefix = 'rb-global-';
 export default class GlobalWarningActionsSwitch {

@@ -1,22 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HR System &ndash; Changelog</title>
-    <link rel="stylesheet" href="/payroll/css/base.css"><link rel="stylesheet" href="/payroll/css/changelog.css">    </head>
-<body>
-    <header>
-    <nav>
-        <ul>
-            <li><a href="/payroll">Home</a></li>
-            <li><a href="/payroll/working-hours">Working hours</a></li>
-            <li><a href="/payroll/production">Production</a></li>
-        </ul>
-    </nav>
-    <p>Version 1.1.4 (<a href="/payroll/changelog.html">Changelog</a>)</p>
-</header>
-    <main><h1>Changelog</h1>
+<?php
+require_once 'Page.php';
+
+$page = new Page('Changelog', ['changelog.css']);
+
+$page->put(function () {
+?>
+<h1>Changelog</h1>
 <search>
     <h2>1.1.4</h2>
     <p>18/01/2025</p>
@@ -100,8 +89,5 @@
     <p>24/12/2024</p>
     <p>Initial version</p>
 </section>
-</main>
-    <footer>
-</footer>
-</body>
-</html>
+<?php
+});

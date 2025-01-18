@@ -1,8 +1,8 @@
 import { getWarningMessage } from "../domain.js";
 import RowId from "../model/RowId.js";
-import { formatHms, insertHeaderCell } from "../util.js";
+import { formatHms, insertHeaderCell } from "../../util.js";
 import WarningView from "./WarningView.js";
-import * as XSLX from "../lib/xlsx.js";
+import * as XSLX from "../../lib/xlsx.js";
 import GlobalWarningActionsSwitch from "./GlobalWarningActionsSwitch.js";
 const columnCount = 5;
 const headerColumnCount = 2;

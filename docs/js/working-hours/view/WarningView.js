@@ -1,5 +1,5 @@
 import { maxWorkTime } from "../domain.js";
-import { DefaultPrimitiveMap } from "../Map.js";
+import { DefaultPrimitiveMap } from "../../Map.js";
 import { ActionId, createSwitchWarningActionsElement } from "../warningActions.js";
 export default class WarningView {
     warning;

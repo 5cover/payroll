@@ -5,6 +5,10 @@ export const timePerHour = 3600_000;
 export const timePerMinute = 60_000;
 export const timePerSecond = 1_000;
 
+export async function loadHtml(path: string) {
+    return new DOMParser().parseFromString(await (await fetch(path)).text(), 'text/html').documentElement
+}
+
 export function requireElementById(id: string) {
     const el = document.getElementById(id);
     if (el === null) {

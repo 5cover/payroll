@@ -1,5 +1,5 @@
-import { DefaultObjectMap } from './Map.js';
-import { notnull, timePerMinute, timePerHour, formatHms } from './util.js';
+import { DefaultObjectMap } from '../Map.js';
+import { notnull, timePerMinute, timePerHour, formatHms } from '../util.js';
 export const minWorkTime = 10 * timePerMinute;
 export const maxWorkTime = 10 * timePerHour;
 ;

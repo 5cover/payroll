@@ -1,4 +1,4 @@
-import { acce } from "./util.js";
+import { acce } from "../util.js";
 export var ActionId;
 (function (ActionId) {
     ActionId["Forbid"] = "forbid";

@@ -1,5 +1,5 @@
 import { Employee, maxWorkTime, Warning } from "../domain.js";
-import { DefaultPrimitiveMap } from "../Map.js";
+import { DefaultPrimitiveMap } from "../../Map.js";
 import RowId from "../model/RowId.js";
 import Result from "../model/Result.js";
 import { ActionId, createSwitchWarningActionsElement} from "../warningActions.js";

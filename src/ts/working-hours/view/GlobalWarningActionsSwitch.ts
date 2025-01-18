@@ -1,5 +1,4 @@
-//import { DefaultPrimitiveMap } from "../Map.js";
-import { requireElementById } from "../util.js";
+import { requireElementById } from "../../util.js";
 import { ActionId, createSwitchWarningActionsElement } from "../warningActions.js";
 import WarningView from "./WarningView.js";
 
