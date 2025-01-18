@@ -5,6 +5,7 @@ import { formatHms, insertHeaderCell } from "../util.js";
 import WarningView from "./WarningView.js";
 
 import * as XSLX from "../lib/xlsx.js";
+import GlobalWarningActionsSwitch from "./GlobalWarningActionsSwitch.js";
 
 const columnCount = 5;
 const headerColumnCount = 2;
@@ -19,6 +20,8 @@ const empProperties: [keyof Employee, string][] = [
 export default class ResultView {
     readonly #tableResults: HTMLTableElement;
     readonly #tableWarnings: HTMLTableElement;
+
+    readonly #gwas = new GlobalWarningActionsSwitch();
 
     #resultCount = 0;
 
@@ -53,10 +56,11 @@ export default class ResultView {
 
                 if (shift.warnings.length > 0) {
                     this.#markResultRowWarning(row, shift.warnings.map(getWarningMessage));
-                    
+
 
                     for (const w of shift.warnings) {
                         const view = new WarningView(result, emp, day, w);
+                        this.#gwas.register(view);
                         row.insertCell().appendChild(view.createSwitchElement(rowId));
                         this.#addWarning(rowId, view);
                     }
@@ -113,7 +117,9 @@ export default class ResultView {
         this.#tableWarnings.createCaption().textContent = 'Warnings';
         {
             const row = this.#tableWarnings.insertRow(0);
-            insertHeaderCell(row).textContent = 'Actions';
+            const thActions = insertHeaderCell(row);
+            thActions.textContent = 'Actions';
+            thActions.appendChild(this.#gwas.element);
             insertHeaderCell(row).textContent = 'Location';
             insertHeaderCell(row).textContent = 'Message';
         }
@@ -146,7 +152,8 @@ export default class ResultView {
 
     #addWarning(rowId: RowId, view: WarningView) {
         const row = this.#tableWarnings.insertRow();
-        row.insertCell().appendChild(view.createSwitchElement(rowId));
+        const $switch = view.createSwitchElement(rowId);
+        row.insertCell().appendChild($switch);
         row.insertCell().innerHTML = `<a href="#${rowId.toString()}">${rowId.toString()}</a>`;
         row.insertCell().textContent = getWarningMessage(view.warning);
     }

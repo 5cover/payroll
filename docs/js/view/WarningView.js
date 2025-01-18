@@ -1,22 +1,13 @@
 import { maxWorkTime } from "../domain.js";
 import { DefaultPrimitiveMap } from "../Map.js";
-import { acce } from "../util.js";
-var ActionId;
-(function (ActionId) {
-    ActionId["Forbid"] = "forbid";
-    ActionId["Cap"] = "cap";
-    ActionId["Allow"] = "allow";
-})(ActionId || (ActionId = {}));
-const actions = new Map();
-actions.set(ActionId.Forbid, { title: 'Forbid', src: 'img/cross.svg', alt: 'Cross' });
-actions.set(ActionId.Cap, { title: 'Cap at max time', src: 'img/indeterminate.svg', alt: 'Indeterminate' });
-actions.set(ActionId.Allow, { title: 'Allow', src: 'img/check.svg', alt: 'Check' });
+import { ActionId, createSwitchWarningActionsElement } from "../warningActions.js";
 export default class WarningView {
     warning;
     #radios = new DefaultPrimitiveMap(() => []);
     #result;
     #employee;
     #day;
+    stateChanged = [];
     #state = ActionId.Cap;
     constructor(result, employee, day, warning) {
         this.#employee = employee;
@@ -24,33 +15,24 @@ export default class WarningView {
         this.warning = warning;
         this.#result = result;
     }
-    createSwitchElement(rowId) {
-        const div = document.createElement('div');
-        div.className = 'switch-warning-actions';
-        for (const [actid, act] of actions) {
-            const label = acce(div, 'label');
-            label.title = act.title;
-            const img = acce(label, 'img');
-            img.src = act.src;
-            const rb = acce(label, 'input');
-            const idBase = `${rowId.toString()}.${this.#radios.get(actid).push(rb)}`;
-            label.htmlFor = idBase + actid;
-            rb.type = 'radio';
-            rb.id = label.htmlFor;
-            rb.name = idBase;
-            rb.value = actid;
-            if (this.#state === actid)
-                rb.defaultChecked = true;
-            rb.addEventListener('input', () => {
-                if (!rb.checked)
-                    return;
-                this.#on(actid);
-                for (const other_rb of this.#radios.get(actid)) {
-                    other_rb.checked = rb.checked;
-                }
-            });
+    get state() {
+        return this.#state;
+    }
+    set state(value) {
+        this.#on(value);
+        for (const rb of this.#radios.get(value)) {
+            rb.checked = true;
         }
-        return div;
+    }
+    createSwitchElement(rowId) {
+        return createSwitchWarningActionsElement((actid, rb) => `${rowId.toString()}.${this.#radios.get(actid).push(rb)}`, (actid, rb) => {
+            if (!rb.checked)
+                return;
+            this.#on(actid);
+            for (const other_rb of this.#radios.get(actid)) {
+                other_rb.checked = rb.checked;
+            }
+        }, { initialState: this.#state });
     }
     #on(actid) {
         if (this.#state === actid)
@@ -81,6 +63,8 @@ export default class WarningView {
                 break;
         }
         shift.workTime = wt;
+        const oldstate = this.#state;
         this.#state = actid;
+        this.stateChanged.forEach(f => f.call(this, oldstate));
     }
 }

@@ -8,7 +8,7 @@
       "savePath": "/docs/css"
     }
   ],
-  "files.exclude": {
-    "**/*.js": true
+  "search.exclude": {
+    "**/*.js": false
   }
 }
