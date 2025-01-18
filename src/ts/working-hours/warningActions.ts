@@ -1,4 +1,4 @@
-import { acce } from "../util.js";
+import { acce, siteBaseUrl } from "../util.js";
 
 export enum ActionId {
     Forbid = 'forbid',
@@ -11,9 +11,9 @@ export const actions = new Map<ActionId, {
     src: string,
     alt: string,
 }>();
-actions.set(ActionId.Forbid, { title: 'Forbid', src: 'img/cross.svg', alt: 'Cross' });
-actions.set(ActionId.Cap, { title: 'Cap at max time', src: 'img/indeterminate.svg', alt: 'Indeterminate' });
-actions.set(ActionId.Allow, { title: 'Allow', src: 'img/check.svg', alt: 'Check' });
+actions.set(ActionId.Forbid, { title: 'Forbid', src: siteBaseUrl + '/img/cross.svg', alt: 'Cross' });
+actions.set(ActionId.Cap, { title: 'Cap at max time', src: siteBaseUrl + '/img/indeterminate.svg', alt: 'Indeterminate' });
+actions.set(ActionId.Allow, { title: 'Allow', src: siteBaseUrl + '/img/check.svg', alt: 'Check' });
 
 export function createSwitchWarningActionsElement(
     baseId: (actid: ActionId, rb: HTMLInputElement) => string,

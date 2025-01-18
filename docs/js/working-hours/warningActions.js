@@ -1,4 +1,4 @@
-import { acce } from "../util.js";
+import { acce, siteBaseUrl } from "../util.js";
 export var ActionId;
 (function (ActionId) {
     ActionId["Forbid"] = "forbid";
@@ -6,9 +6,9 @@ export var ActionId;
     ActionId["Allow"] = "allow";
 })(ActionId || (ActionId = {}));
 export const actions = new Map();
-actions.set(ActionId.Forbid, { title: 'Forbid', src: 'img/cross.svg', alt: 'Cross' });
-actions.set(ActionId.Cap, { title: 'Cap at max time', src: 'img/indeterminate.svg', alt: 'Indeterminate' });
-actions.set(ActionId.Allow, { title: 'Allow', src: 'img/check.svg', alt: 'Check' });
+actions.set(ActionId.Forbid, { title: 'Forbid', src: siteBaseUrl + '/img/cross.svg', alt: 'Cross' });
+actions.set(ActionId.Cap, { title: 'Cap at max time', src: siteBaseUrl + '/img/indeterminate.svg', alt: 'Indeterminate' });
+actions.set(ActionId.Allow, { title: 'Allow', src: siteBaseUrl + '/img/check.svg', alt: 'Check' });
 export function createSwitchWarningActionsElement(baseId, oninput, options = {}) {
     const div = document.createElement('div');
     div.className = 'switch-warning-actions';
