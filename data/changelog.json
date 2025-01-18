@@ -1,0 +1,49 @@
+{
+  "1.1.4": {
+    "date": "2025-01-18",
+    "newFeatures": [
+      "Global warning state switch"
+    ]
+  },
+  "1.1.3": {
+    "date": "2025-01-17",
+    "newFeatures": [
+      "Clear confirmation for sizeable results",
+      "XLSX export"
+    ]
+  },
+  "1.1.2": {
+    "date": "2025-01-16",
+    "newFeatures": [
+      "Resolve warnings"
+    ]
+  },
+  "1.1.1": {
+    "date": "2024-01-11",
+    "newFeatures": [
+      "Total employee work time"
+    ]
+  },
+  "1.1.0": {
+    "date": "2024-12-27",
+    "newFeatures": [
+      "Warning summary"
+    ],
+    "changes": [
+      "Double badges are no longer reported"
+    ]
+  },
+  "1.0.1": {
+    "date": "2024-12-26",
+    "newFeatures": [
+      "Result header row",
+      "Warnings: double badge on entrance (<10min work period) and forgot to badge exit (>10h work period)"
+    ],
+    "changes": ["Improved ergonomy: better error messages, ID number reunited"],
+    "bugfixes": ["Fixed XLS calculation errors"]
+  },
+  "1.0.0": {
+    "date": "2024-12-24",
+    "description": "Initial version"
+  }
+}

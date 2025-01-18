@@ -13,5 +13,13 @@
     "**/*.js": false
   },
   "typescript.preferences.importModuleSpecifier": "relative",
-  "typescript.preferences.importModuleSpecifierEnding": "js"
+  "typescript.preferences.importModuleSpecifierEnding": "js",
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "/data/changelog.json"
+      ],
+      "url": "/schemas/changelog.json"
+    }
+  ]
 }

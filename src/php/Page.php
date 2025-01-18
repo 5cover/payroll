@@ -1,6 +1,7 @@
 <?php
 require_once 'util.php';
 require_once 'const.php';
+require_once 'Changelog.php';
 
 final class Page
 {
@@ -73,7 +74,7 @@ final class Page
             <li><a href="<?= SITE_BASE_URL ?>/production">Production</a></li>
         </ul>
     </nav>
-    <p>Version 1.1.4 (<a href="<?= SITE_BASE_URL ?>/changelog.html">Changelog</a>)</p>
+    <p>Version <?= h14s(Changelog::get()->latestVersion) ?> (<a href="<?= SITE_BASE_URL ?>/changelog.html">Changelog</a>)</p>
 </header>
 <?php
     }
