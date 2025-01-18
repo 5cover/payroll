@@ -15,7 +15,7 @@ final class Changelog
 
     private function __construct(array $versions)
     {
-        sort($versions);
+        rsort($versions);
         $this->versions = $versions;
     }
 
