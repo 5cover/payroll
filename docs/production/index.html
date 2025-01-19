@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HR System &ndash; Production</title>
-    <link rel="stylesheet" href="/payroll/css/base.css">    </head>
+    <link rel="stylesheet" href="/payroll/css/base.css"><link rel="stylesheet" href="/payroll/css/production/index.css">    <script type="module" src="/payroll/js/procution/index.js"></script></head>
 <body>
     <header>
     <nav>
@@ -16,7 +16,298 @@
     </nav>
     <p>Version 1.1.4 (<a href="/payroll/changelog.html">Changelog</a>)</p>
 </header>
-    <main>coming soon</main>
+    <main>    <table>
+        <caption><strong class="c">Suivi de production</strong></caption>
+        <thead>
+            <tr>
+                <th><label for="date">Date:</label></th>
+                <td colspan="5"><input type="date" name="date" id="date"></td>
+                <th><label for="equipe">Équipe:</label></th>
+                <td colspan="3"><input type="text" name="equipe" id="equipe"></td>
+                <th><label for="nb-employes">Nombre d'employés:</label></th>
+                <td><input type="number" name="nb-employes" id="nb-employes" min="0"></td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th colspan="2"><label for="numero-machine">Numéro de machine:</label></th>
+                <td><select name="numero-machine" id="numero-machine">
+                                                    <option value="1">1</option>                            <option value="2">2</option>                            <option value="3">3</option>                            <option value="4">4</option>                            <option value="5">5</option>                            <option value="6">6</option>                            <option value="7">7</option>                            <option value="8">8</option>                            <option value="9">9</option>                            <option value="10">10</option>                            <option value="11">11</option>                            <option value="12">12</option>                            <option value="13">13</option>                            <option value="14">14</option>                            <option value="15">15</option>                            <option value="16">16</option>                            <option value="17">17</option>                            <option value="18">18</option>                            <option value="19">19</option>                            <option value="20">20</option>                            <option value="21">21</option>                            <option value="22">22</option>                            <option value="23">23</option>                            <option value="24">24</option>                            <option value="25">25</option>                            <option value="26">26</option>                            <option value="27">27</option>                            <option value="28">28</option>                            <option value="29">29</option>                            <option value="30">30</option>                            <option value="31">31</option>                            <option value="32">32</option>                            <option value="33">33</option>                            <option value="34">34</option>                            <option value="35">35</option>                            <option value="36">36</option>                            <option value="37">37</option>                            <option value="38">38</option>                            <option value="39">39</option>                            <option value="40">40</option>                            <option value="41">41</option>                    </select></td>
+                <td></td>
+                <th><label for="pp-homo">PP HOMO:</label></th>
+                <td><select name="pp-homo" id="pp-homo"></select></td>
+                <td><div class="sep"><input type="number" name="pp-homo-pct" id="pp-homo-pct" min="0" max="100" value="50">&nbsp;%</div>
+</td>
+                <th><label for="resine-granulee">Résine granulée:</label></th>
+                <td><input type="text" name="resine-granulee" id="resine-granulee"></td>
+                <td><div class="sep"><input type="number" name="resine-granulee-pct" id="resine-granulee-pct" min="0" max="100" value="50">&nbsp;%</div>
+</td>
+                <td colspan="2"></td>
+            </tr>
+            <tr>
+                <th colspan="2">Nom du produit:</th>
+                <td id="nom-produit"></td>
+                <td></td>
+                <th><label for="pp-copo">PP COPO:</label></th>
+                <td><select name="pp-copo" id="pp-copo"></select></td>
+                <td><div class="sep"><input type="number" name="pp-copo-pct" id="pp-copo-pct" min="0" max="100" value="50">&nbsp;%</div>
+</td>
+                <th><label for="caco3">CaCO3:</label></th>
+                <td><input type="text" name="caco3" id="caco3"></td>
+                <td><div class="sep"><input type="number" name="caco3-pct" id="caco3-pct" min="0" max="100" value="50">&nbsp;%</div>
+</td>
+                <td colspan="2"></td>
+            </tr>
+            <tr>
+                <th colspan="2"><label for="numero-moule">Numéro de moule:</label></th>
+                <td><input type="text" name="numero-moule" id="numero-moule"></td>
+                <td></td>
+                <th><label for="pp-random">PP RANDOM:</label></th>
+                <td><select name="pp-random" id="pp-random"></select></td>
+                <td><div class="sep"><input type="number" name="pp-random-pct" id="pp-random-pct" min="0" max="100" value="50">&nbsp;%</div>
+</td>
+                <th><label for="gfrp">GFRP:</label></th>
+                <td><input type="text" name="gfrp" id="gfrp"></td>
+                <td><div class="sep"><input type="number" name="gfrp-pct" id="gfrp-pct" min="0" max="100" value="50">&nbsp;%</div>
+</td>
+                <td colspan="2"></td>
+            </tr>
+            <tr>
+                <th colspan="2"><label for="couleurs">Couleurs:</label></th>
+                <td><select name="couleurs" id="couleurs"></select></td>
+                <td></td>
+                <th><label for="abs">ABS:</label></th>
+                <td><select name="abs" id="abs"></select></td>
+                <td><div class="sep"><input type="number" name="abc-pct" id="abc-pct" min="0" max="100" value="50">&nbsp;%</div>
+</td>
+                <td colspan="5"></td>
+            </tr>
+            <tr>
+                <th colspan="2"><label for="dosage-masterbatch-pct">Dosage de masterbatch:</label></th>
+                <td><div class="sep"><input type="number" name="dosage-masterbatch-pct" id="dosage-masterbatch-pct" min="0" max="100" value="1.2" step="0.01">&nbsp;%</div>
+</td>
+                <td id="dosage-masterbatch-pct-times-poids-produit-total"></td>
+                <th><label for="miseflex">MISEFLEX:</label></th>
+                <td><select name="miseflex" id="miseflex"></select></td>
+                <td><div class="sep"><input type="number" name="miseflex-pct" id="miseflex-pct" min="0" max="100" value="50">&nbsp;%</div>
+</td>
+                <td colspan="5"></td>
+            </tr>
+            <tr>
+                <th colspan="2"><label for="date-debut-lot">Lot de production:</label></th>
+                <td><input type="date" name="date-debut-lot" id="date-debut-lot"></td>
+                <td><input type="date" name="date-fin-lot" id="date-fin-lot"></td>
+                <th><label for="date-fin-lot">Durée de production:</label></th>
+                <td colspan="2" id="duree-lot"></td>
+                <td colspan="5"></td>
+            </tr>
+        </tbody>
+        <tbody>
+            <tr>
+                <th class="c">Temps</th>
+                <th class="c">Production</th>
+                <th class="c">Bon produits</th>
+                <th class="c">Produits défectueux</th>
+                <th class="c">Poids du produit (KGS)</th>
+                <th class="c">Poids du carrot (KGS)</th>
+                <th class="c">Cadence(s)</th>
+                <th class="c">Nombre de cavités du module</th>
+                <th class="c">Temps de la défaillance (min)</th>
+                <th class="c">Production totale</th>
+                <th class="c">Matricule</th>
+                <th class="c">Remarques</th>
+            </tr>
+                        <tr>
+                <th class="c">6:00-8:00</th>
+                <td><input type="number" name="production-6" id="production-6" min="0"></td>
+<td><input type="number" name="bon-6" id="bon-6" min="0"></td>
+<td><input type="number" name="mauvais-6" id="mauvais-6" min="0"></td>
+<td><input type="number" name="poids-produit-6" id="poids-produit-6" min="0" step="0.001"></td>
+<td><input type="number" name="poids-carrot-6" id="poids-carrot-6" min="0" step="0.001"></td>
+<td><input type="number" name="cadences-6" id="cadences-6" min="0" step="0.1"></td>
+<td><input type="number" name="nb-cavites-6" id="nb-cavites-6" min="0"></td>
+<td><input type="number" name="temps-defaillance-6" id="temps-defaillance-6" min="0" max="120"></td>
+<td><input type="number" name="production-totale-6" id="production-totale-6" min="0"></td>
+<td><input type="text" name="matricule-6" id="matricule-6"></td>
+<td><input type="text" name="remarques-6" id="remarques-6"></td>
+            </tr>
+                        <tr>
+                <th class="c">8:00-10:00</th>
+                <td><input type="number" name="production-8" id="production-8" min="0"></td>
+<td><input type="number" name="bon-8" id="bon-8" min="0"></td>
+<td><input type="number" name="mauvais-8" id="mauvais-8" min="0"></td>
+<td><input type="number" name="poids-produit-8" id="poids-produit-8" min="0" step="0.001"></td>
+<td><input type="number" name="poids-carrot-8" id="poids-carrot-8" min="0" step="0.001"></td>
+<td><input type="number" name="cadences-8" id="cadences-8" min="0" step="0.1"></td>
+<td><input type="number" name="nb-cavites-8" id="nb-cavites-8" min="0"></td>
+<td><input type="number" name="temps-defaillance-8" id="temps-defaillance-8" min="0" max="120"></td>
+<td><input type="number" name="production-totale-8" id="production-totale-8" min="0"></td>
+<td><input type="text" name="matricule-8" id="matricule-8"></td>
+<td><input type="text" name="remarques-8" id="remarques-8"></td>
+            </tr>
+                        <tr>
+                <th class="c">10:00-12:00</th>
+                <td><input type="number" name="production-10" id="production-10" min="0"></td>
+<td><input type="number" name="bon-10" id="bon-10" min="0"></td>
+<td><input type="number" name="mauvais-10" id="mauvais-10" min="0"></td>
+<td><input type="number" name="poids-produit-10" id="poids-produit-10" min="0" step="0.001"></td>
+<td><input type="number" name="poids-carrot-10" id="poids-carrot-10" min="0" step="0.001"></td>
+<td><input type="number" name="cadences-10" id="cadences-10" min="0" step="0.1"></td>
+<td><input type="number" name="nb-cavites-10" id="nb-cavites-10" min="0"></td>
+<td><input type="number" name="temps-defaillance-10" id="temps-defaillance-10" min="0" max="120"></td>
+<td><input type="number" name="production-totale-10" id="production-totale-10" min="0"></td>
+<td><input type="text" name="matricule-10" id="matricule-10"></td>
+<td><input type="text" name="remarques-10" id="remarques-10"></td>
+            </tr>
+                        <tr>
+                <th class="c">12:00-14:00</th>
+                <td><input type="number" name="production-12" id="production-12" min="0"></td>
+<td><input type="number" name="bon-12" id="bon-12" min="0"></td>
+<td><input type="number" name="mauvais-12" id="mauvais-12" min="0"></td>
+<td><input type="number" name="poids-produit-12" id="poids-produit-12" min="0" step="0.001"></td>
+<td><input type="number" name="poids-carrot-12" id="poids-carrot-12" min="0" step="0.001"></td>
+<td><input type="number" name="cadences-12" id="cadences-12" min="0" step="0.1"></td>
+<td><input type="number" name="nb-cavites-12" id="nb-cavites-12" min="0"></td>
+<td><input type="number" name="temps-defaillance-12" id="temps-defaillance-12" min="0" max="120"></td>
+<td><input type="number" name="production-totale-12" id="production-totale-12" min="0"></td>
+<td><input type="text" name="matricule-12" id="matricule-12"></td>
+<td><input type="text" name="remarques-12" id="remarques-12"></td>
+            </tr>
+                        <tr>
+                <th class="c">14:00-16:00</th>
+                <td><input type="number" name="production-14" id="production-14" min="0"></td>
+<td><input type="number" name="bon-14" id="bon-14" min="0"></td>
+<td><input type="number" name="mauvais-14" id="mauvais-14" min="0"></td>
+<td><input type="number" name="poids-produit-14" id="poids-produit-14" min="0" step="0.001"></td>
+<td><input type="number" name="poids-carrot-14" id="poids-carrot-14" min="0" step="0.001"></td>
+<td><input type="number" name="cadences-14" id="cadences-14" min="0" step="0.1"></td>
+<td><input type="number" name="nb-cavites-14" id="nb-cavites-14" min="0"></td>
+<td><input type="number" name="temps-defaillance-14" id="temps-defaillance-14" min="0" max="120"></td>
+<td><input type="number" name="production-totale-14" id="production-totale-14" min="0"></td>
+<td><input type="text" name="matricule-14" id="matricule-14"></td>
+<td><input type="text" name="remarques-14" id="remarques-14"></td>
+            </tr>
+                        <tr>
+                <th class="c">16:00-18:00</th>
+                <td><input type="number" name="production-16" id="production-16" min="0"></td>
+<td><input type="number" name="bon-16" id="bon-16" min="0"></td>
+<td><input type="number" name="mauvais-16" id="mauvais-16" min="0"></td>
+<td><input type="number" name="poids-produit-16" id="poids-produit-16" min="0" step="0.001"></td>
+<td><input type="number" name="poids-carrot-16" id="poids-carrot-16" min="0" step="0.001"></td>
+<td><input type="number" name="cadences-16" id="cadences-16" min="0" step="0.1"></td>
+<td><input type="number" name="nb-cavites-16" id="nb-cavites-16" min="0"></td>
+<td><input type="number" name="temps-defaillance-16" id="temps-defaillance-16" min="0" max="120"></td>
+<td><input type="number" name="production-totale-16" id="production-totale-16" min="0"></td>
+<td><input type="text" name="matricule-16" id="matricule-16"></td>
+<td><input type="text" name="remarques-16" id="remarques-16"></td>
+            </tr>
+                        <tr>
+                <th class="c">18:00-20:00</th>
+                <td><input type="number" name="production-18" id="production-18" min="0"></td>
+<td><input type="number" name="bon-18" id="bon-18" min="0"></td>
+<td><input type="number" name="mauvais-18" id="mauvais-18" min="0"></td>
+<td><input type="number" name="poids-produit-18" id="poids-produit-18" min="0" step="0.001"></td>
+<td><input type="number" name="poids-carrot-18" id="poids-carrot-18" min="0" step="0.001"></td>
+<td><input type="number" name="cadences-18" id="cadences-18" min="0" step="0.1"></td>
+<td><input type="number" name="nb-cavites-18" id="nb-cavites-18" min="0"></td>
+<td><input type="number" name="temps-defaillance-18" id="temps-defaillance-18" min="0" max="120"></td>
+<td><input type="number" name="production-totale-18" id="production-totale-18" min="0"></td>
+<td><input type="text" name="matricule-18" id="matricule-18"></td>
+<td><input type="text" name="remarques-18" id="remarques-18"></td>
+            </tr>
+                        <tr>
+                <th class="c">20:00-22:00</th>
+                <td><input type="number" name="production-20" id="production-20" min="0"></td>
+<td><input type="number" name="bon-20" id="bon-20" min="0"></td>
+<td><input type="number" name="mauvais-20" id="mauvais-20" min="0"></td>
+<td><input type="number" name="poids-produit-20" id="poids-produit-20" min="0" step="0.001"></td>
+<td><input type="number" name="poids-carrot-20" id="poids-carrot-20" min="0" step="0.001"></td>
+<td><input type="number" name="cadences-20" id="cadences-20" min="0" step="0.1"></td>
+<td><input type="number" name="nb-cavites-20" id="nb-cavites-20" min="0"></td>
+<td><input type="number" name="temps-defaillance-20" id="temps-defaillance-20" min="0" max="120"></td>
+<td><input type="number" name="production-totale-20" id="production-totale-20" min="0"></td>
+<td><input type="text" name="matricule-20" id="matricule-20"></td>
+<td><input type="text" name="remarques-20" id="remarques-20"></td>
+            </tr>
+                        <tr>
+                <th class="c">22:00-24:00</th>
+                <td><input type="number" name="production-22" id="production-22" min="0"></td>
+<td><input type="number" name="bon-22" id="bon-22" min="0"></td>
+<td><input type="number" name="mauvais-22" id="mauvais-22" min="0"></td>
+<td><input type="number" name="poids-produit-22" id="poids-produit-22" min="0" step="0.001"></td>
+<td><input type="number" name="poids-carrot-22" id="poids-carrot-22" min="0" step="0.001"></td>
+<td><input type="number" name="cadences-22" id="cadences-22" min="0" step="0.1"></td>
+<td><input type="number" name="nb-cavites-22" id="nb-cavites-22" min="0"></td>
+<td><input type="number" name="temps-defaillance-22" id="temps-defaillance-22" min="0" max="120"></td>
+<td><input type="number" name="production-totale-22" id="production-totale-22" min="0"></td>
+<td><input type="text" name="matricule-22" id="matricule-22"></td>
+<td><input type="text" name="remarques-22" id="remarques-22"></td>
+            </tr>
+                        <tr>
+                <th class="c">0:00-2:00</th>
+                <td><input type="number" name="production-0" id="production-0" min="0"></td>
+<td><input type="number" name="bon-0" id="bon-0" min="0"></td>
+<td><input type="number" name="mauvais-0" id="mauvais-0" min="0"></td>
+<td><input type="number" name="poids-produit-0" id="poids-produit-0" min="0" step="0.001"></td>
+<td><input type="number" name="poids-carrot-0" id="poids-carrot-0" min="0" step="0.001"></td>
+<td><input type="number" name="cadences-0" id="cadences-0" min="0" step="0.1"></td>
+<td><input type="number" name="nb-cavites-0" id="nb-cavites-0" min="0"></td>
+<td><input type="number" name="temps-defaillance-0" id="temps-defaillance-0" min="0" max="120"></td>
+<td><input type="number" name="production-totale-0" id="production-totale-0" min="0"></td>
+<td><input type="text" name="matricule-0" id="matricule-0"></td>
+<td><input type="text" name="remarques-0" id="remarques-0"></td>
+            </tr>
+                        <tr>
+                <th class="c">2:00-4:00</th>
+                <td><input type="number" name="production-2" id="production-2" min="0"></td>
+<td><input type="number" name="bon-2" id="bon-2" min="0"></td>
+<td><input type="number" name="mauvais-2" id="mauvais-2" min="0"></td>
+<td><input type="number" name="poids-produit-2" id="poids-produit-2" min="0" step="0.001"></td>
+<td><input type="number" name="poids-carrot-2" id="poids-carrot-2" min="0" step="0.001"></td>
+<td><input type="number" name="cadences-2" id="cadences-2" min="0" step="0.1"></td>
+<td><input type="number" name="nb-cavites-2" id="nb-cavites-2" min="0"></td>
+<td><input type="number" name="temps-defaillance-2" id="temps-defaillance-2" min="0" max="120"></td>
+<td><input type="number" name="production-totale-2" id="production-totale-2" min="0"></td>
+<td><input type="text" name="matricule-2" id="matricule-2"></td>
+<td><input type="text" name="remarques-2" id="remarques-2"></td>
+            </tr>
+                        <tr>
+                <th class="c">4:00-6:00</th>
+                <td><input type="number" name="production-4" id="production-4" min="0"></td>
+<td><input type="number" name="bon-4" id="bon-4" min="0"></td>
+<td><input type="number" name="mauvais-4" id="mauvais-4" min="0"></td>
+<td><input type="number" name="poids-produit-4" id="poids-produit-4" min="0" step="0.001"></td>
+<td><input type="number" name="poids-carrot-4" id="poids-carrot-4" min="0" step="0.001"></td>
+<td><input type="number" name="cadences-4" id="cadences-4" min="0" step="0.1"></td>
+<td><input type="number" name="nb-cavites-4" id="nb-cavites-4" min="0"></td>
+<td><input type="number" name="temps-defaillance-4" id="temps-defaillance-4" min="0" max="120"></td>
+<td><input type="number" name="production-totale-4" id="production-totale-4" min="0"></td>
+<td><input type="text" name="matricule-4" id="matricule-4"></td>
+<td><input type="text" name="remarques-4" id="remarques-4"></td>
+            </tr>
+                    </tbody>
+        <tfoot>
+            <tr>
+                <th class="c"><strong>Total:</strong></th>
+                <td><input type="number" name="production-total" id="production-total" min="0"></td>
+<td><input type="number" name="bon-total" id="bon-total" min="0"></td>
+<td><input type="number" name="mauvais-total" id="mauvais-total" min="0"></td>
+<td><input type="number" name="poids-produit-total" id="poids-produit-total" min="0" step="0.001"></td>
+<td><input type="number" name="poids-carrot-total" id="poids-carrot-total" min="0" step="0.001"></td>
+<td><input type="number" name="cadences-total" id="cadences-total" min="0" step="0.1"></td>
+<td><input type="number" name="nb-cavites-total" id="nb-cavites-total" min="0"></td>
+<td><input type="number" name="temps-defaillance-total" id="temps-defaillance-total" min="0" max="120"></td>
+<td><input type="number" name="production-totale-total" id="production-totale-total" min="0"></td>
+<td><input type="text" name="matricule-total" id="matricule-total"></td>
+<td><input type="text" name="remarques-total" id="remarques-total"></td>
+            </tr>
+            <tr>
+                <th colspan="7">Signature du responsable:</th>
+                <th colspan="5">Date:</th>
+            </tr>
+        </tfoot>
+    </table>
+    </main>
     <footer>
 </footer>
 </body>

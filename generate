@@ -2,7 +2,9 @@
 set -eu
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-php -d include_path="$PWD"/src/php src/php/generate.php
+php -d include_path="$PWD"/src/php -f src/php/generate.php -- "$@"
+if [[ $# -ne 0 ]]; then exit; fi
+
 echo -n 'tsc... '
 tsc
 echo ok

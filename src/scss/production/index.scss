@@ -1,0 +1,79 @@
+table,
+caption {
+    border: 2px solid black;
+}
+
+table {
+    border-collapse: collapse;
+    border-top: none;
+    width: 100%;
+    font-family: Arial;
+}
+
+caption {
+    align-content: center;
+    border-bottom: none;
+    font-size: larger;
+    text-transform: uppercase;
+}
+
+table > :is(thead, tbody, tfoot) + * {
+    border-top: 3px double black;
+}
+
+th {
+    font-weight: normal;
+    text-align: left;
+    padding: .2em;
+}
+
+th,
+td {
+    border: 1px solid black;
+}
+
+th,
+td,
+caption {
+    height: 3rem;
+}
+
+th,
+caption {
+    background-color: yellow;
+}
+
+td:not(:has(input, select)) {
+    background-color: #fafafa;
+}
+
+input,
+select {
+    width: 100%;
+    height: 100%;
+    font-size: 1em;
+    border: none;
+
+    &:is(:hover, :focus, :focus-within) {
+        filter: brightness(0.965);
+    }
+}
+
+.sep {
+    height: 100%;
+    input, select {
+        width: auto;
+    }
+}
+
+.c {
+    text-align: center;
+}
+
+.good {
+    background-color: #92d050;
+}
+
+.bad {
+    background-color: red;
+}
