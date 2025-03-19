@@ -14,7 +14,7 @@ export class DefaultPrimitiveMap<TKey extends PrimitiveType, TValue> extends Map
     map(key: TKey, transform: (value: TValue) => TValue) {
         this.set(key, transform(this.get(key)));
     }
-    get(key: TKey) {
+    override get(key: TKey) {
         const value = super.get(key);
         if (value !== undefined) {
             return value;
