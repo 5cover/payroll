@@ -1,7 +1,7 @@
 <?php
 require_once 'Page.php';
 
-$page = new Page('Production', ['production/index.css'], ['procution/index.js']);
+$page = new Page('Production', ['production/index.css'], ['production/index.js']);
 $page->put(function () {
     ?>
     <table>
